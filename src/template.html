@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHP Error Log Viewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Light Theme Variables */
+    :root {
+      --bg-primary: #f9fafb;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f3f4f6;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #d1d5db;
+      --button-primary: #3b82f6;
+      --button-secondary: #6b7280;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #dc2626;
+    }
+
+    /* Dark Theme Variables */
+    [data-theme="dark"] {
+      --bg-primary: #000000;
+      --bg-secondary: #1a1a1a;
+      --bg-accent: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --border-color: #404040;
+      --button-primary: #3b82f6;
+      --button-secondary: #6b7280;
+      --error-bg: #2d1b1b;
+      --error-border: #dc2626;
+      --error-text: #fecaca;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .bg-custom-secondary {
+      background-color: var(--bg-secondary);
+    }
+
+    .bg-custom-accent {
+      background-color: var(--bg-accent);
+    }
+
+    .text-custom-primary {
+      color: var(--text-primary);
+    }
+
+    .text-custom-secondary {
+      color: var(--text-secondary);
+    }
+
+    .border-custom {
+      border-color: var(--border-color);
+    }
+
+    .error-animation {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    .critical-blink {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+
+    .group-header:hover {
+      background-color: var(--bg-accent);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      background-color: #f8fafc;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background-color: #e5e7eb;
+      border-color: #9ca3af;
+    }
+
+    [data-theme="dark"] .copy-btn {
+      background-color: #374151;
+      color: #d1d5db;
+      border-color: #4b5563;
+    }
+
+    [data-theme="dark"] .copy-btn:hover {
+      background-color: #4b5563;
+      border-color: #6b7280;
+    }
+
+    .solved-overlay {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: bold;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      max-width: 100px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .solved-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: bold;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      max-width: 80px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .theme-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .theme-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.theme-slider {
+      background-color: #2196F3;
+    }
+
+    input:checked+.theme-slider:before {
+      transform: translateX(26px);
+    }
+
+    /* Unknown error styling */
+    .error-unknown {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      border-color: #333333 !important;
+    }
+
+    [data-theme="dark"] .error-unknown {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      border-color: #333333 !important;
+    }
+
+    /* Dark mode overrides to eliminate white backgrounds */
+    [data-theme="dark"] .bg-white {
+      background-color: var(--bg-secondary) !important;
+    }
+
+    [data-theme="dark"] .bg-gray-50,
+    [data-theme="dark"] .bg-gray-100,
+    [data-theme="dark"] .bg-yellow-50,
+    [data-theme="dark"] .bg-blue-50,
+    [data-theme="dark"] .bg-red-50,
+    [data-theme="dark"] .bg-green-50,
+    [data-theme="dark"] .bg-orange-50 {
+      background-color: var(--bg-accent) !important;
+    }
+
+    [data-theme="dark"] .bg-yellow-100,
+    [data-theme="dark"] .bg-blue-100,
+    [data-theme="dark"] .bg-red-100,
+    [data-theme="dark"] .bg-green-100,
+    [data-theme="dark"] .bg-orange-100 {
+      background-color: var(--bg-secondary) !important;
+    }
+
+    [data-theme="dark"] .text-gray-800,
+    [data-theme="dark"] .text-yellow-800,
+    [data-theme="dark"] .text-blue-800,
+    [data-theme="dark"] .text-red-800,
+    [data-theme="dark"] .text-green-800,
+    [data-theme="dark"] .text-orange-800 {
+      color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .text-gray-600,
+    [data-theme="dark"] .text-yellow-600,
+    [data-theme="dark"] .text-blue-600,
+    [data-theme="dark"] .text-red-600,
+    [data-theme="dark"] .text-green-600,
+    [data-theme="dark"] .text-orange-600 {
+      color: var(--text-secondary) !important;
+    }
+
+    [data-theme="dark"] .border-yellow-200,
+    [data-theme="dark"] .border-blue-200,
+    [data-theme="dark"] .border-red-200,
+    [data-theme="dark"] .border-green-200,
+    [data-theme="dark"] .border-orange-200,
+    [data-theme="dark"] .border-gray-200 {
+      border-color: var(--border-color) !important;
+    }
+
+    [data-theme="dark"] .border-yellow-300,
+    [data-theme="dark"] .border-blue-300,
+    [data-theme="dark"] .border-red-300,
+    [data-theme="dark"] .border-green-300,
+    [data-theme="dark"] .border-orange-300 {
+      border-color: var(--border-color) !important;
+    }
+    
+    /* Error Type Tag Styling */
+    .error-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid;
+      transition: all 0.2s ease;
+    }
+    
+    /* Warning Tags */
+    .error-tag.tag-warning {
+      background-color: #fbbf24;
+      color: #92400e;
+      border-color: #f59e0b;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-warning {
+      background-color: #d97706;
+      color: #fef3c7;
+      border-color: #f59e0b;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+    }
+    
+    /* Error/Fatal Tags */
+    .error-tag.tag-error,
+    .error-tag.tag-fatal {
+      background-color: #ef4444;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-error,
+    [data-theme="dark"] .error-tag.tag-fatal {
+      background-color: #dc2626;
+      color: #fef2f2;
+      border-color: #ef4444;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Notice Tags */
+    .error-tag.tag-notice {
+      background-color: #3b82f6;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-notice {
+      background-color: #2563eb;
+      color: #dbeafe;
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Deprecated Tags */
+    .error-tag.tag-deprecated {
+      background-color: #f97316;
+      color: #ffffff;
+      border-color: #ea580c;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-deprecated {
+      background-color: #ea580c;
+      color: #fed7aa;
+      border-color: #f97316;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    }
+    
+    /* Unknown Tags */
+    .error-tag.tag-unknown {
+      background-color: #000000;
+      color: #ffffff;
+      border-color: #374151;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-unknown {
+      background-color: #111827;
+      color: #f9fafb;
+      border-color: #4b5563;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Parse Tags */
+    .error-tag.tag-parse {
+      background-color: #8b5cf6;
+      color: #ffffff;
+      border-color: #7c3aed;
+    }
+    
+    [data-theme="dark"] .error-tag.tag-parse {
+      background-color: #7c3aed;
+      color: #ede9fe;
+      border-color: #8b5cf6;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
+  </style>
+
+  <!-- Immediate theme application to prevent white flash -->
+  <script>
+    (function () {
+      const savedTheme = document.cookie.split('; ').find(row => row.startsWith('0xAY_php_error_log_theme='));
+      if (savedTheme && savedTheme.split('=')[1] === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-red-700 flex items-center gap-2">
+          🐘 PHP Error Log Viewer
+          <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded critical-blink">Enhanced</span>
+        </h1>
+        <p class="text-custom-secondary mt-1">Monitor and analyze PHP errors with tracking and theme support</p>
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <!-- Theme Toggle -->
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-custom-secondary">🌙</span>
+          <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="theme-slider"></span>
+          </label>
+          <span class="text-sm text-custom-secondary">☀️</span>
+        </div>
+
+        <a href="/admin/error/_/" target="_blank"
+          class="bg-custom-secondary border-custom text-custom-primary px-4 py-2 rounded-lg shadow transition-colors duration-200 border">
+          📄 Raw Log
+        </a>
+        <button onclick="location.reload()"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition-colors duration-200">
+          🔄 Refresh
+        </button>
+        <a href="?clear"
+          onclick="return confirm('Are you sure you want to clear the error log? This action cannot be undone.')"
+          class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition-colors duration-200">
+          🧹 Clear Log
+        </a>
+      </div>
+    </div>
+
+    <!-- Enhanced Features Info -->
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <h3 class="font-semibold text-blue-800 mb-2">💡 Enhanced Features:</h3>
+      <ul class="text-sm text-blue-700 space-y-1">
+        <li>• <strong>Error Tracking:</strong> Mark errors as solved and track who fixed them</li>
+        <li>• <strong>Dark/Light Theme:</strong> Switch themes with persistent storage</li>
+        <li>• <strong>Full Error View:</strong> View complete error logs for each entry</li>
+        <li>• <strong>Smart Copy:</strong> Copy file paths with enhanced buttons</li>
+        <li>• <strong>Progress Tracking:</strong> Visual indicators for solved vs unsolved errors</li>
+      </ul>
+    </div>
+
+    <!-- Developer Identity Section -->
+    <div class="bg-custom-secondary border border-custom rounded-lg p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="text-lg">👤</div>
+          <div>
+            <div class="text-sm font-medium text-custom-primary">Current Developer</div>
+            <div class="text-xs text-custom-secondary">Responsible for error resolution tracking</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="currentDeveloperName"
+            class="font-semibold text-custom-primary bg-custom-accent px-3 py-1 rounded"></span>
+          <button onclick="changeDeveloperName()"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+            ✏️ Change Name
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {errors}
+
+    <!-- Footer -->
+    <div class="mt-8 text-center text-custom-secondary text-sm">
+      <p style="color: #000000;">Developed By
+        <b>
+          <a href="https://0xAhmadYousuf.com" style="text-decoration: none; color: #000000;" target="_blank">
+            0xAhmadYousuf
+          </a>
+        </b>
+      </p>
+      <p>Enhanced Error Log Viewer with Tracking - Last updated: 8/16/2025, 5:19:24 AM </p>
+      <p class="mt-1">Supporting error tracking, themes, and enhanced UX</p>
+    </div>
+  </div>
+
+  <!-- Error Details Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div
+      class="bg-custom-secondary border-custom border rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div class="flex justify-between items-center p-4 border-b border-custom">
+        <h3 class="text-lg font-semibold text-custom-primary">Full Error Details</h3>
+        <button onclick="closeErrorModal()"
+          class="text-custom-secondary hover:text-custom-primary text-2xl">&times;</button>
+      </div>
+      <div class="p-4 overflow-y-auto max-h-[70vh]">
+        <pre id="errorModalContent" class="text-sm font-mono whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reoccurred List Modal -->
+  <div id="reoccurredListModal"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div
+      class="bg-custom-secondary border-custom border rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+      <div class="flex justify-between items-center p-4 border-b border-custom">
+        <h3 class="text-lg font-semibold text-custom-primary">⚠️ Reoccurred Errors List</h3>
+        <button onclick="closeReoccurredListModal()"
+          class="text-custom-secondary hover:text-custom-primary text-2xl">&times;</button>
+      </div>
+      <div class="p-4 overflow-y-auto max-h-[60vh]">
+        <div class="text-sm text-custom-primary mb-4">These errors were previously solved but have occurred again:</div>
+        <ul id="reoccurredListContent" class="space-y-2 text-sm"></ul>
+      </div>
+    </div>
+  </div>
+  <div id="reoccurrenceModal"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-custom-secondary border-custom border rounded-lg shadow-xl max-w-2xl w-full">
+      <div class="flex justify-between items-center p-4 border-b border-custom">
+        <h3 class="text-lg font-semibold text-custom-primary">⚠️ Reoccurrence Details</h3>
+        <button onclick="closeReoccurrenceModal()"
+          class="text-custom-secondary hover:text-custom-primary text-2xl">&times;</button>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <h4 class="font-semibold text-orange-800 mb-2">Error Information</h4>
+            <div class="text-sm space-y-1">
+              <div><strong>Message:</strong> <span id="reoccurMessage" class="font-mono"></span></div>
+              <div><strong>File:</strong> <span id="reoccurFile" class="font-mono"></span></div>
+              <div><strong>Line:</strong> <span id="reoccurLine" class="font-mono"></span></div>
+            </div>
+          </div>
+
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h4 class="font-semibold text-green-800 mb-2">Previous Solution</h4>
+            <div class="text-sm space-y-1">
+              <div><strong>Solved by:</strong> <span id="reoccurSolver" class="font-semibold"></span></div>
+              <div><strong>Solved on:</strong> <span id="reoccurSolveDate"></span></div>
+            </div>
+          </div>
+
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 class="font-semibold text-red-800 mb-2">⚠️ Status</h4>
+            <p class="text-sm text-red-700">This error was previously marked as solved but has occurred again after the
+              solve date. It may require re-investigation or the solution may not have been complete.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button onclick="closeReoccurrenceModal()"
+            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
+          <button onclick="reMarkErrorSolved()"
+            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Re-Mark as Solved</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Management
+    function initTheme() {
+      const savedTheme = getCookie('0xAY_php_error_log_theme') || 'light';
+      const themeToggle = document.getElementById('themeToggle');
+
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.checked = true;
+      }
+
+      themeToggle.addEventListener('change', function () {
+        const theme = this.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        setCookie('0xAY_php_error_log_theme', theme, 365);
+      });
+    }
+
+    // Developer Name Management
+    function initDeveloperName() {
+      let developerName = getCookie('0xAY_php_error_log_developer_name');
+
+      if (!developerName) {
+        // Prompt for developer name on first visit
+        developerName = prompt('Welcome! Please enter your developer name for error tracking:');
+        if (developerName && developerName.trim()) {
+          developerName = developerName.trim();
+          setCookie('0xAY_php_error_log_developer_name', developerName, 365);
+        } else {
+          developerName = 'Anonymous Developer';
+          setCookie('0xAY_php_error_log_developer_name', developerName, 365);
+        }
+      }
+
+      document.getElementById('currentDeveloperName').textContent = developerName;
+      return developerName;
+    }
+
+    function changeDeveloperName() {
+      const currentName = getCookie('0xAY_php_error_log_developer_name') || 'Anonymous Developer';
+      const newName = prompt('Enter your developer name:', currentName);
+
+      if (newName && newName.trim() && newName.trim() !== currentName) {
+        const finalName = newName.trim();
+        setCookie('0xAY_php_error_log_developer_name', finalName, 365);
+        document.getElementById('currentDeveloperName').textContent = finalName;
+
+        // Show confirmation
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        notification.textContent = `Developer name updated to: ${finalName}`;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 3000);
+      }
+    }
+
+    // Cookie Management
+    function setCookie(name, value, days) {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = name + '=' + value + ';expires=' + expires.toUTCString() + ';path=/';
+    }
+
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    }
+
+    // Section Management Functions
+    function toggleSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      const icon = document.getElementById(sectionId + 'Icon');
+      const cookieName = '0xAY_php_error_log_section_' + sectionId;
+
+      if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        icon.innerHTML = '▼';
+        setCookie(cookieName, 'expanded', 30);
+      } else {
+        section.classList.add('hidden');
+        icon.innerHTML = '▶';
+        setCookie(cookieName, 'collapsed', 30);
+      }
+    }
+
+    function initSectionStates() {
+      const sections = ['criticalErrors', 'solvedReoccurred', 'recentErrors', 'errorGroups'];
+
+      sections.forEach(sectionId => {
+        const cookieName = '0xAY_php_error_log_section_' + sectionId;
+        const state = getCookie(cookieName);
+        const section = document.getElementById(sectionId);
+        const icon = document.getElementById(sectionId + 'Icon');
+
+        if (section && icon) {
+          // Special case: Show "Solved but Occurred Again" section by default if it has content
+          if (sectionId === 'solvedReoccurred' && !section.classList.contains('hidden')) {
+            if (state !== 'collapsed') {
+              section.classList.remove('hidden');
+              icon.innerHTML = '▼';
+            } else {
+              section.classList.add('hidden');
+              icon.innerHTML = '▶';
+            }
+          } else {
+            // For other sections, default to collapsed unless expanded is saved
+            if (state === 'expanded') {
+              section.classList.remove('hidden');
+              icon.innerHTML = '▼';
+            } else {
+              section.classList.add('hidden');
+              icon.innerHTML = '▶';
+            }
+          }
+        }
+      });
+    }
+
+    function searchErrors(input) {
+      const searchTerm = input.value.toLowerCase();
+      const errorGroups = document.querySelectorAll('#error-groups-content > div');
+
+      errorGroups.forEach(group => {
+        const groupText = group.textContent.toLowerCase();
+        if (groupText.includes(searchTerm)) {
+          group.style.display = 'block';
+        } else {
+          group.style.display = 'none';
+        }
+      });
+    }
+
+    // Error Management Functions
+    function toggleElement(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('hidden');
+    }
+
+    function toggleGroup(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('hidden');
+    }
+
+    function copyPath(fullPath) {
+      let path = fullPath;
+
+      if (path.includes('public_html/')) {
+        path = '/' + path.split('public_html/')[1];
+      }
+
+      if (path.includes('.')) {
+        const lastSlash = path.lastIndexOf('/');
+        if (lastSlash > 0) {
+          path = path.substring(0, lastSlash + 1);
+        }
+      } else if (!path.endsWith('/')) {
+        path += '/';
+      }
+
+      navigator.clipboard.writeText(path).then(() => {
+        event.target.innerHTML = '✅ Copied';
+        event.target.style.backgroundColor = '#10b981';
+        event.target.style.color = '#ffffff';
+        setTimeout(() => {
+          event.target.innerHTML = '📋 Copy Path';
+          event.target.style.backgroundColor = '';
+          event.target.style.color = '';
+          event.target.className = event.target.className;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+
+    function showFullError(content) {
+      document.getElementById('errorModalContent').textContent = content;
+      document.getElementById('errorModal').classList.remove('hidden');
+    }
+
+    function showFullErrorById(element) {
+      const errorContent = element.getAttribute('data-error-content');
+      if (errorContent) {
+        document.getElementById('errorModalContent').textContent = errorContent;
+        document.getElementById('errorModal').classList.remove('hidden');
+      }
+    }
+
+    function closeErrorModal() {
+      document.getElementById('errorModal').classList.add('hidden');
+    }
+
+    function showReoccurrenceDetails(errorHash, solvedBy, solveDate, message, file, line) {
+      document.getElementById('reoccurMessage').textContent = message;
+      document.getElementById('reoccurFile').textContent = file;
+      document.getElementById('reoccurLine').textContent = line;
+      document.getElementById('reoccurSolver').textContent = solvedBy;
+      document.getElementById('reoccurSolveDate').textContent = solveDate;
+
+      // Store error hash for potential re-solving
+      document.getElementById('reoccurrenceModal').setAttribute('data-error-hash', errorHash);
+      document.getElementById('reoccurrenceModal').classList.remove('hidden');
+    }
+
+    function closeReoccurrenceModal() {
+      document.getElementById('reoccurrenceModal').classList.add('hidden');
+    }
+
+    function reMarkErrorSolved() {
+      const errorHash = document.getElementById('reoccurrenceModal').getAttribute('data-error-hash');
+      promptMarkSolved('error', errorHash);
+      closeReoccurrenceModal();
+    }
+
+    function showReoccurredList(groupName, errorList) {
+      const errors = JSON.parse(errorList);
+      const contentEl = document.getElementById('reoccurredListContent');
+
+      contentEl.innerHTML = '';
+      errors.forEach((error, index) => {
+        const li = document.createElement('li');
+        li.className = 'bg-custom-accent p-3 rounded border border-custom';
+        li.innerHTML = `<strong>${index + 1}.</strong> ${error}`;
+        contentEl.appendChild(li);
+      });
+
+      document.querySelector('#reoccurredListModal h3').textContent = `⚠️ Reoccurred Errors in ${groupName}`;
+      document.getElementById('reoccurredListModal').classList.remove('hidden');
+    }
+
+    function closeReoccurredListModal() {
+      document.getElementById('reoccurredListModal').classList.add('hidden');
+    }
+
+    function markFileSolved(filePath, solvedBy) {
+      fetch('update_error_status.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'file',
+          path: filePath,
+          solved: true,
+          solved_by: solvedBy,
+          timestamp: new Date().toISOString()
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          }
+        });
+    }
+
+    function markErrorSolved(errorHash, solvedBy) {
+      fetch('update_error_status.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'error',
+          hash: errorHash,
+          solved: true,
+          solved_by: solvedBy,
+          timestamp: new Date().toISOString()
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          }
+        });
+    }
+
+    function promptMarkSolved(type, identifier) {
+      const currentDeveloper = getCookie('0xAY_php_error_log_developer_name') || 'Anonymous Developer';
+      const confirm = window.confirm(`Mark this ${type} as solved by ${currentDeveloper}?`);
+
+      if (confirm) {
+        if (type === 'file') {
+          markFileSolved(identifier, currentDeveloper);
+        } else {
+          markErrorSolved(identifier, currentDeveloper);
+        }
+      }
+    }
+
+    // Search functionality
+    function searchErrors(input) {
+      const filter = input.value.toLowerCase();
+      const groups = document.querySelectorAll("#error-groups > div, .bg-red-50 > div[id*='nonphp_group']");
+
+      groups.forEach(group => {
+        const text = group.innerText.toLowerCase();
+        const matches = text.includes(filter);
+        group.style.display = matches ? '' : 'none';
+
+        if (matches && filter.length > 2) {
+          const groupContent = group.querySelector('[id^="group_"], [id^="nonphp_group_"]');
+          if (groupContent) {
+            groupContent.classList.remove('hidden');
+          }
+        }
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      initTheme();
+      initDeveloperName();
+      initSectionStates();
+      document.getElementById('current-time').textContent = new Date().toLocaleString();
+
+      // Auto-expand first group
+      const firstGroup = document.querySelector('[id^="group_"], [id^="nonphp_group_"]');
+      if (firstGroup) {
+        firstGroup.classList.remove('hidden');
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'f':
+            e.preventDefault();
+            document.querySelector('input[type="text"]')?.focus();
+            break;
+          case 'r':
+            e.preventDefault();
+            location.reload();
+            break;
+        }
+      }
+
+      if (e.key === 'Escape') {
+        closeErrorModal();
+        closeReoccurrenceModal();
+        closeReoccurredListModal();
+      }
+    });
+  </script>
+</body>
+
+</html>

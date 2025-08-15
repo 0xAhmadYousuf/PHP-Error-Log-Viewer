@@ -1,0 +1,122 @@
+{
+    "last_updated": "2025-08-16 01:40:48",
+    "errors": {
+        "67922e03ee63365c255ec8748f27cda7": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:30:26.103Z"
+        },
+        "726da73ec8616b7ea98b62cf1939bd16": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:30:43.536Z"
+        },
+        "fff3860e678c570a24b7111868dff6d4": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:23.903Z"
+        },
+        "8fb6e684c1c190f2afdf90122255da9d": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:40:48.306Z"
+        }
+    },
+    "files": {
+        "\/var\/www\/html\/bootstrap.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:30:32.615Z"
+        },
+        "\/var\/www\/html\/public\/view_item.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:03.933Z"
+        },
+        "\/var\/www\/html\/legacy\/old_plugin.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:12.278Z"
+        },
+        "\/var\/www\/html\/includes\/functions_b.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:51.030Z"
+        },
+        "": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:53.598Z"
+        },
+        "\/var\/www\/html\/public\/app.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:55.942Z"
+        },
+        "\/var\/www\/html\/includes\/functions_a.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:36:58.462Z"
+        },
+        "\/var\/www\/html\/public\/profile.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:05.046Z"
+        },
+        "\/var\/www\/html\/config\/config.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:09.407Z"
+        },
+        "\/var\/www\/html\/api\/v2\/auth.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:11.686Z"
+        },
+        "\/var\/www\/html\/admin\/file_browser.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:13.935Z"
+        },
+        "\/var\/www\/html\/api\/data_retrieval.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:37:18.087Z"
+        },
+        "\/var\/www\/html\/api\/router.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:01.617Z"
+        },
+        "\/var\/www\/html\/api\/data_reader.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:05.640Z"
+        },
+        "\/var\/www\/html\/templates\/profile.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:11.480Z"
+        },
+        "\/var\/www\/html\/templates\/header.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:16.578Z"
+        },
+        "\/var\/www\/html\/includes\/auth.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:19.193Z"
+        },
+        "\/var\/www\/html\/public\/setup.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:39:35.737Z"
+        },
+        "\/var\/www\/html\/src\/Integration\/PayPalClient.php": {
+            "solved": true,
+            "solved_by": "Ahmad Yousuf",
+            "timestamp": "2025-08-15T23:40:28.498Z"
+        }
+    }
+}

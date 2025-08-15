@@ -1,0 +1,290 @@
+# --- PHP Parse Error (Syntax Error): This is a critical error. The script cannot even be compiled, so execution stops immediately. Often caused by a missing semicolon, unmatched bracket, etc. This is usually at the top of the log if it prevents the script from starting.
+[05-Apr-2023 08:00:01 UTC] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/public/index.php on line 5
+
+# --- PHP Notice: Undefined variable. A very common notice, indicating a variable was used before it was assigned a value.
+[05-Apr-2023 08:01:10 UTC] PHP Notice:  Undefined variable: pageTitle in /var/www/html/templates/header.php on line 15
+
+# --- PHP Notice: Undefined array key (index). Another common notice, accessing an array element that doesn't exist.
+[05-Apr-2023 08:01:11 UTC] PHP Notice:  Undefined index: user_name in /var/www/html/includes/auth.php on line 30
+
+# --- PHP Warning: include() failed to open stream. The script will continue execution after this warning.
+[05-Apr-2023 08:02:05 UTC] PHP Warning:  include(/var/www/html/config/database.local.php): Failed to open stream: No such file or directory in /var/www/html/config/app.php on line 10
+
+# --- PHP Warning: include() - Failed opening for inclusion. Companion warning to the above.
+[05-Apr-2023 08:02:05 UTC] PHP Warning:  include(): Failed opening '/var/www/html/config/database.local.php' for inclusion (include_path='.:/usr/local/lib/php') in /var/www/html/config/app.php on line 10
+
+# --- PHP Warning: Invalid argument supplied for foreach(). Occurs when trying to iterate over a non-array value.
+[05-Apr-2023 08:03:15 UTC] PHP Warning:  Invalid argument supplied for foreach() in /var/www/html/admin/reports/user_activity.php on line 55
+
+# --- PHP Warning: Division by zero. A mathematical error.
+[05-Apr-2023 08:04:00 UTC] PHP Warning:  Division by zero in /var/www/html/includes/helpers.php on line 203
+
+# --- PHP Deprecated: Using a function that is outdated and will be removed in future PHP versions.
+[05-Apr-2023 08:05:30 UTC] PHP Deprecated:  Function create_function() is deprecated in /var/www/html/legacy/old_plugin.php on line 87
+
+# --- PHP Fatal error: Uncaught Error: Call to undefined function. This error halts script execution.
+[05-Apr-2023 08:06:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_current_user_roles() in /var/www/html/admin/dashboard.php:42
+[05-Apr-2023 08:06:45 UTC] Stack trace:
+[05-Apr-2023 08:06:45 UTC] #0 {main}
+[05-Apr-2023 08:06:45 UTC]   thrown in /var/www/html/admin/dashboard.php on line 42
+
+# --- PHP Fatal error: Uncaught Error: Class 'DatabaseConnection' not found. Another script-halting error.
+[05-Apr-2023 08:07:10 UTC] PHP Fatal error:  Uncaught Error: Class "DatabaseConnection" not found in /var/www/html/includes/db.php:12
+[05-Apr-2023 08:07:10 UTC] Stack trace:
+[05-Apr-2023 08:07:10 UTC] #0 /var/www/html/public/index.php(8): require_once()
+[05-Apr-2023 08:07:10 UTC] #1 {main}
+[05-Apr-2023 08:07:10 UTC]   thrown in /var/www/html/includes/db.php on line 12
+
+# --- PHP Fatal error: Uncaught TypeError: Argument type mismatch. (PHP 7+ specific)
+[05-Apr-2023 08:08:20 UTC] PHP Fatal error:  Uncaught TypeError: Argument 1 passed to User::setEmail() must be of the type string, int given, called in /var/www/html/api/v1/users.php on line 65 and defined in /var/www/html/src/Models/User.php:110
+[05-Apr-2023 08:08:20 UTC] Stack trace:
+[05-Apr-2023 08:08:20 UTC] #0 /var/www/html/api/v1/users.php(65): User->setEmail(12345)
+[05-Apr-2023 08:08:20 UTC] #1 {main}
+[05-Apr-2023 08:08:20 UTC]   thrown in /var/www/html/src/Models/User.php on line 110
+
+# --- PHP Fatal error: Uncaught ArgumentCountError: Too few arguments. (PHP 7+ specific)
+[05-Apr-2023 08:09:05 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function PaymentGateway::processTransaction(), 2 passed in /var/www/html/checkout.php on line 99 and exactly 3 expected in /var/www/html/src/Services/PaymentGateway.php:45
+[05-Apr-2023 08:09:05 UTC] Stack trace:
+[05-Apr-2023 08:09:05 UTC] #0 /var/www/html/checkout.php(99): PaymentGateway::processTransaction(150.00, 'USD')
+[05-Apr-2023 08:09:05 UTC] #1 {main}
+[05-Apr-2023 08:09:05 UTC]   thrown in /var/www/html/src/Services/PaymentGateway.php on line 45
+
+# --- PHP Fatal error: Allowed memory size exhausted. Indicates a script tried to use more RAM than allowed by `memory_limit`.
+[05-Apr-2023 08:10:00 UTC] PHP Fatal error:  Allowed memory size of 268435456 bytes exhausted (tried to allocate 32768 bytes) in /var/www/html/admin/data_exports/large_report.php on line 180
+
+# --- PHP Fatal error: Maximum execution time exceeded. Indicates a script ran longer than allowed by `max_execution_time`.
+[05-Apr-2023 08:11:00 UTC] PHP Fatal error:  Maximum execution time of 60 seconds exceeded in /var/www/html/cron_jobs/image_processing.php on line 250
+
+# --- PHP Fatal error: require(): Failed opening required. Similar to include, but fatal if the file is not found.
+[05-Apr-2023 08:12:15 UTC] PHP Fatal error:  require(): Failed opening required '/var/www/html/vendor/autoload.php' (include_path='.:/usr/local/lib/php') in /var/www/html/bootstrap.php on line 5
+
+# --- PHP Warning: file_put_contents() failed. Example of a file operation error due to permissions or full disk.
+[05-Apr-2023 08:13:00 UTC] PHP Warning:  file_put_contents(/data/logs/app.log): Failed to open stream: Permission denied in /var/www/html/src/Logger.php on line 45
+
+# --- PHP Warning: date(): Unknown or badly formatted timezone. Common timezone configuration issue.
+[05-Apr-2023 08:14:00 UTC] PHP Warning:  date(): Unknown or badly formatted timezone (Europe/Berlinxxx) in /var/www/html/includes/timezone_check.php on line 10
+
+# --- PHP Warning: strtotime(): Failed to parse time string.
+[05-Apr-2023 08:15:00 UTC] PHP Warning:  strtotime(): Failed to parse time string (invalid date format) at position 0 (invalid date format) in /var/www/html/api/stats.php on line 77
+
+# --- PHP Notice: Trying to get property 'name' of non-object. Occurs when attempting to access a property on a variable that isn't an object (e.g., null, false).
+[05-Apr-2023 08:16:00 UTC] PHP Notice:  Trying to get property 'name' of non-object in /var/www/html/templates/profile.php on line 35
+
+# --- PHP Warning: Use of undefined constant. (Older PHP or specific configuration, usually a Notice now)
+[05-Apr-2023 08:17:00 UTC] PHP Warning:  Use of undefined constant MY_CONST - assumed 'MY_CONST' (this will throw an Error in a future version of PHP) in /var/www/html/public/constants.php on line 5
+
+# --- PHP Warning: session_start(): Failed to decode session object. Indicates a corrupted session.
+[05-Apr-2023 08:18:00 UTC] PHP Warning:  session_start(): Failed to decode session object. Session has been destroyed in /var/www/html/includes/session.php on line 5
+
+# --- PHP Warning: Cannot modify header information - headers already sent. Very common, indicates output was sent before a header() call.
+[05-Apr-2023 08:19:00 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/debug.php:3) in /var/www/html/public/redirect.php on line 10
+
+# --- PHP Warning: A non-numeric value encountered. Math operation with a string that PHP tries to convert.
+[05-Apr-2023 08:20:00 UTC] PHP Warning:  A non-numeric value encountered in /var/www/html/analytics/data_processor.php on line 125
+
+# --- PHP Fatal error: Uncaught PDOException: SQLSTATE[HY000] [2002] Connection refused (Database Library Error - Laravel/Symfony context simulated via 'vendor/' path)
+[05-Apr-2023 08:21:00 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [2002] Connection refused in /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+[05-Apr-2023 08:21:00 UTC] Stack trace:
+[05-Apr-2023 08:21:00 UTC] #0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'root', 'wrong_pass', Array)
+[05-Apr-2023 08:21:00 UTC] #1 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'root', 'wrong_pass', Array)
+[05-Apr-2023 08:21:00 UTC] #2 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(207): Illuminate\Database\Connectors\MySqlConnector->connect(Array)
+[05-Apr-2023 08:21:00 UTC] #3 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(166): Illuminate\Database\Connectors\ConnectionFactory->createConnection(Array)
+[05-Apr-2023 08:21:00 UTC] #4 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(89): Illuminate\Database\Connectors\ConnectionFactory->make(Array, 'mysql')
+[05-Apr-2023 08:21:00 UTC] #5 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(103): Illuminate\Database\DatabaseManager->makeConnection('mysql')
+[05-Apr-2023 08:21:00 UTC] #6 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(124): Illuminate\Database\DatabaseManager->resolve('mysql')
+[05-Apr-2023 08:21:00 UTC] #7 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(329): Illuminate\Database\DatabaseManager->connection('mysql')
+[05-Apr-2023 08:21:00 UTC] #8 /var/www/html/app/Models/User.php(50): Illuminate\Database\DatabaseManager::__callStatic('table', Array)
+[05-Apr-2023 08:21:00 UTC] #9 /var/www/html/app/Http/Controllers/UserController.php(25): App\Models\User::getAll()
+[05-Apr-2023 08:21:00 UTC] #10 /var/www/html/public/index.php(15): App\Http\Controllers\UserController->index()
+[05-Apr-2023 08:21:00 UTC] #11 {main}
+[05-Apr-2023 08:21:00 UTC]   thrown in /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php on line 70
+
+# --- PHP Fatal error: Uncaught GuzzleHttp\Exception\ClientException: HTTP 404 Not Found (HTTP Client Library Error)
+[05-Apr-2023 08:22:30 UTC] PHP Fatal error:  Uncaught GuzzleHttp\Exception\ClientException: Client error: `GET https://api.external.com/v1/nonexistent` resulted in a `404 Not Found` response in /var/www/html/vendor/guzzlehttp/guzzle/src/Exception/RequestException.php:113
+[05-Apr-2023 08:22:30 UTC] Stack trace:
+[05-Apr-2023 08:22:30 UTC] #0 /var/www/html/vendor/guzzlehttp/guzzle/src/Middleware.php(71): GuzzleHttp\Exception\RequestException::create(Object(GuzzleHttp\Psr7\Request), Object(GuzzleHttp\Psr7\Response), NULL)
+[05-Apr-2023 08:22:30 UTC] #1 /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/SyncHandler.php(41): GuzzleHttp\Middleware::GuzzleHttp\{closure}(Object(GuzzleHttp\Psr7\Response))
+[05-Apr-2023 08:22:30 UTC] #2 /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/Proxy.php(28): GuzzleHttp\Handler\SyncHandler->__invoke(Object(GuzzleHttp\Psr7\Request), Array)
+[05-Apr-2023 08:22:30 UTC] #3 /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/Proxy.php(51): GuzzleHttp\Handler\Proxy::GuzzleHttp\Handler\{closure}(Object(GuzzleHttp\Psr7\Request), Array)
+[05-Apr-2023 08:22:30 UTC] #4 /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/Proxy.php(76): GuzzleHttp\Handler\Proxy::GuzzleHttp\Handler\{closure}(Object(GuzzleHttp\Psr7\Request), Array)
+[05-Apr-2023 08:22:30 UTC] #5 /var/www/html/vendor/guzzlehttp/guzzle/src/Client.php(131): GuzzleHttp\Handler\Proxy::GuzzleHttp\Handler\{closure}(Object(GuzzleHttp\Psr7\Request), Array)
+[05-Apr-2023 08:22:30 UTC] #6 /var/www/html/src/Integrations/ExternalApi.php(75): GuzzleHttp\Client->request('GET', 'https://api.ext...', Array)
+[05-Apr-2023 08:22:30 UTC] #7 /var/www/html/public/fetch_data.php(12): App\Integrations\ExternalApi->fetchResource('nonexistent')
+[05-Apr-2023 08:22:30 UTC] #8 {main}
+[05-Apr-2023 08:22:30 UTC]   thrown in /var/www/html/vendor/guzzlehttp/guzzle/src/Exception/RequestException.php on line 113
+
+# --- PHP Warning: json_decode(): Syntax error. Occurs when parsing invalid JSON string.
+[05-Apr-2023 08:23:45 UTC] PHP Warning:  json_decode(): Syntax error in /var/www/html/api/process_payload.php on line 50
+
+# --- PHP Fatal error: Uncaught Error: Call to a member function prepare() on null (Database Connection not established)
+[05-Apr-2023 08:24:00 UTC] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /var/www/html/src/Database/QueryBuilder.php:80
+[05-Apr-2023 08:24:00 UTC] Stack trace:
+[05-Apr-2023 08:24:00 UTC] #0 /var/www/html/src/Repository/UserRepository.php(30): App\Database\QueryBuilder->select('users', Array)
+[05-Apr-2023 08:24:00 UTC] #1 /var/www/html/public/profile.php(15): App\Repository\UserRepository->findById(1)
+[05-Apr-2023 08:24:00 UTC] #2 {main}
+[05-Apr-2023 08:24:00 UTC]   thrown in /var/www/html/src/Database/QueryBuilder.php on line 80
+
+# --- PHP Warning: file_get_contents(): Peer certificate CN (Common Name) did not match expected CN. SSL/TLS error.
+[05-Apr-2023 08:25:00 UTC] PHP Warning:  file_get_contents(https://badssl.com): Peer certificate CN=`badssl.com` did not match expected CN=`www.example.com` in /var/www/html/includes/fetch_remote.php on line 12
+
+# --- PHP Warning: array_merge(): Expected parameter 2 to be an array, null given.
+[05-Apr-2023 08:26:00 UTC] PHP Warning:  array_merge(): Expected parameter 2 to be an array, null given in /var/www/html/src/Config.php on line 20
+
+# --- PHP Warning: fopen(): Permission denied. File system write error.
+[05-Apr-2023 08:27:00 UTC] PHP Warning:  fopen(/var/www/html/cache/temp.txt): Failed to open stream: Permission denied in /var/www/html/src/CacheManager.php on line 60
+
+# --- PHP Fatal error: Uncaught Doctrine\DBAL\Exception\ConnectionException (Doctrine ORM/DBAL error)
+[05-Apr-2023 08:28:00 UTC] PHP Fatal error:  Uncaught Doctrine\DBAL\Exception\ConnectionException: An exception occurred in the driver: SQLSTATE[HY000] [1045] Access denied for user 'appuser'@'localhost' (using password: YES) in /var/www/html/vendor/doctrine/dbal/src/Driver/API/MySQL/ExceptionConverter.php:48
+[05-Apr-2023 08:28:00 UTC] Stack trace:
+[05-Apr-2023 08:28:00 UTC] #0 /var/www/html/vendor/doctrine/dbal/src/Driver/API/MySQL/ExceptionConverter.php(48): Doctrine\DBAL\Driver\API\MySQL\ExceptionConverter::convert(Object(Doctrine\DBAL\Driver\PDO\Exception), Object(Doctrine\DBAL\Connection))
+[05-Apr-2023 08:28:00 UTC] #1 /var/www/html/vendor/doctrine/dbal/src/ExceptionConverter.php(108): Doctrine\DBAL\Driver\API\MySQL\ExceptionConverter::convert(Object(Doctrine\DBAL\Driver\PDO\Exception), Object(Doctrine\DBAL\Connection))
+[05-Apr-2023 08:28:00 UTC] #2 /var/www/html/vendor/doctrine/dbal/src/Connection.php(1828): Doctrine\DBAL\ExceptionConverter->convert(Object(Doctrine\DBAL\Driver\PDO\Exception))
+[05-Apr-2023 08:28:00 UTC] #3 /var/www/html/vendor/doctrine/dbal/src/Connection.php(1747): Doctrine\DBAL\Connection->convertException(Object(Doctrine\DBAL\Driver\PDO\Exception))
+[05-Apr-2023 08:28:00 UTC] #4 /var/www/html/vendor/doctrine/dbal/src/Connection.php(1707): Doctrine\DBAL\Connection->executeQuery('SELECT * FROM u...', Array, Array, NULL)
+[05-Apr-2023 08:28:00 UTC] #5 /var/www/html/src/Repository/ProductRepository.php(40): Doctrine\DBAL\Connection->fetchAllAssociative('SELECT * FROM u...')
+[05-Apr-2023 08:28:00 UTC] #6 /var/www/html/public/products.php(10): App\Repository\ProductRepository->findAll()
+[05-Apr-2023 08:28:00 UTC] #7 {main}
+[05-Apr-2023 08:28:00 UTC]   thrown in /var/www/html/vendor/doctrine/dbal/src/Driver/API/MySQL/ExceptionConverter.php on line 48
+
+# --- PHP Warning: imagecreatefromjpeg(): '/data/uploads/corrupted.jpg' is not a valid JPEG file. (GD/Image processing error)
+[05-Apr-2023 08:29:00 UTC] PHP Warning:  imagecreatefromjpeg(): '/data/uploads/corrupted.jpg' is not a valid JPEG file in /var/www/html/src/ImageProcessor.php on line 70
+
+# --- PHP Warning: Undefined property: stdClass::$address. Accessing a property that doesn't exist on an object.
+[05-Apr-2023 08:30:00 UTC] PHP Warning:  Undefined property: stdClass::$address in /var/www/html/api/checkout.php on line 120
+
+# --- PHP Warning: array_push(): Argument #1 ($array) must be of type array, string given. Type mismatch for an array function.
+[05-Apr-2023 08:31:00 UTC] PHP Warning:  array_push(): Argument #1 ($array) must be of type array, string given in /var/www/html/src/QueueProcessor.php on line 35
+
+# --- PHP Deprecated: str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated. (PHP 8.1+ specific, stricter type checking)
+[05-Apr-2023 08:32:00 UTC] PHP Deprecated:  str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated in /var/www/html/src/StringUtils.php on line 15
+
+# --- PHP Fatal error: Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, array given.
+[05-Apr-2023 08:33:00 UTC] PHP Fatal error:  Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, array given in /var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php:260
+[05-Apr-2023 08:33:00 UTC] Stack trace:
+[05-Apr-2023 08:33:00 UTC] #0 /var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php(260): call_user_func_array(Array, Array)
+[05-Apr-2023 08:33:00 UTC] #1 /var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php(237): Symfony\Component\EventDispatcher\EventDispatcher->callListeners(Array, 'kernel.request', Object(Symfony\Component\HttpKernel\Event\RequestEvent))
+[05-Apr-2023 08:33:00 UTC] #2 /var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php(61): Symfony\Component\EventDispatcher\EventDispatcher->dispatch(Object(Symfony\Component\HttpKernel\Event\RequestEvent), 'kernel.request')
+[05-Apr-2023 08:33:00 UTC] #3 /var/www/html/vendor/symfony/http-kernel/HttpKernel.php(117): Symfony\Component\EventDispatcher\EventDispatcher->dispatch(Object(Symfony\Component\HttpKernel\Event\RequestEvent), 'kernel.request')
+[05-Apr-2023 08:33:00 UTC] #4 /var/www/html/vendor/symfony/http-kernel/HttpKernel.php(79): Symfony\Component\HttpKernel\HttpKernel->handleRaw(Object(Symfony\Component\HttpFoundation\Request), 1)
+[05-Apr-2023 08:33:00 UTC] #5 /var/www/html/vendor/symfony/http-kernel/Kernel.php(199): Symfony\Component\HttpKernel\HttpKernel->handle(Object(Symfony\Component\HttpFoundation\Request), 1, true)
+[05-Apr-2023 08:33:00 UTC] #6 /var/www/html/public/app.php(25): Symfony\Component\HttpKernel\Kernel->handle(Object(Symfony\Component\HttpFoundation\Request))
+[05-Apr-2023 08:33:00 UTC] #7 {main}
+[05-Apr-2023 08:33:00 UTC]   thrown in /var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php on line 260
+
+# --- PHP Warning: mysqli_real_escape_string(): (null) [2006] MySQL server has gone away. (Database specific warning)
+[05-Apr-2023 08:34:00 UTC] PHP Warning:  mysqli_real_escape_string(): (null) [2006] MySQL server has gone away in /var/www/html/includes/db_legacy.php on line 45
+
+# --- PHP Notice: Trying to access array offset on value of type null. (PHP 7.4+ specific, previously a warning)
+[05-Apr-2023 08:35:00 UTC] PHP Notice:  Trying to access array offset on value of type null in /var/www/html/api/data_reader.php on line 90
+
+# --- PHP Fatal error: Uncaught ParseError: syntax error, unexpected token "interface" (WordPress plugin/theme context)
+[05-Apr-2023 08:36:00 UTC] PHP Fatal error:  Uncaught ParseError: syntax error, unexpected token "interface" in /home/user/public_html/wp-content/plugins/broken-plugin/broken-plugin.php:15
+[05-Apr-2023 08:36:00 UTC] Stack trace:
+[05-Apr-2023 08:36:00 UTC] #0 /home/user/public_html/wp-includes/plugin.php(XXX): include_once()
+[05-Apr-2023 08:36:00 UTC] #1 /home/user/public_html/wp-settings.php(XXX): do_action('plugins_loaded')
+[05-Apr-2023 08:36:00 UTC] #2 /home/user/public_html/wp-config.php(XXX): require_once('/home/user/publ...')
+[05-Apr-2023 08:36:00 UTC] #3 /home/user/public_html/wp-load.php(XXX): require_once('/home/user/publ...')
+[05-Apr-2023 08:36:00 UTC] #4 /home/user/public_html/wp-blog-header.php(XXX): require_once('/home/user/publ...')
+[05-Apr-2023 08:36:00 UTC] #5 /home/user/public_html/index.php(XXX): require('/home/user/publ...')
+[05-Apr-2023 08:36:00 UTC] #6 {main}
+[05-Apr-2023 08:36:00 UTC]   thrown in /home/user/public_html/wp-content/plugins/broken-plugin/broken-plugin.php on line 15
+
+# --- PHP Fatal error: Uncaught RuntimeException: Failed to acquire lock (simulating concurrent access issues)
+[05-Apr-2023 08:37:00 UTC] PHP Fatal error:  Uncaught RuntimeException: Failed to acquire lock for file /tmp/process.lock. Is another process running? in /opt/php/scripts/job_runner.php:120
+[05-Apr-2023 08:37:00 UTC] Stack trace:
+[05-Apr-2023 08:37:00 UTC] #0 {main}
+[05-Apr-2023 08:37:00 UTC]   thrown in /opt/php/scripts/job_runner.php on line 120
+
+# --- PHP Warning: array_keys() expects parameter 1 to be an array, bool given.
+[05-Apr-2023 08:38:00 UTC] PHP Warning:  array_keys() expects parameter 1 to be an array, bool given in /var/www/html/src/DataMapper.php on line 95
+
+# --- PHP Warning: curl_setopt_array(): supplied argument is not a valid cURL handle resource. (cURL related error)
+[05-Apr-2023 08:39:00 UTC] PHP Warning:  curl_setopt_array(): supplied argument is not a valid cURL handle resource in /var/www/html/src/HttpClient.php on line 80
+
+# --- PHP Fatal error: Uncaught Error: Object of class stdClass could not be converted to string.
+[05-Apr-2023 08:40:00 UTC] PHP Fatal error:  Uncaught Error: Object of class stdClass could not be converted to string in /var/www/html/templates/email_template.php:40
+[05-Apr-2023 08:40:00 UTC] Stack trace:
+[05-Apr-2023 08:40:00 UTC] #0 {main}
+[05-Apr-2023 08:40:00 UTC]   thrown in /var/www/html/templates/email_template.php on line 40
+
+# --- PHP Deprecated: Required parameter $id follows optional parameter $name. (PHP 8.0+ specific, breaking change in function signatures)
+[05-Apr-2023 08:41:00 UTC] PHP Deprecated:  Required parameter $id follows optional parameter $name in /var/www/html/src/LegacyService.php on line 12
+
+# --- PHP Warning: A session had already been started - ignoring session_start(). (Often from conflicting session handlers or misplaced calls)
+[05-Apr-2023 08:42:00 UTC] PHP Warning:  A session had already been started - ignoring session_start() in /var/www/html/public/login.php on line 5
+
+# --- PHP Fatal error: Uncaught mysqli_sql_exception: Unknown database 'non_existent_db' (Database specific error)
+[05-Apr-2023 08:43:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'non_existent_db' in /var/www/html/src/Database/MySQLiWrapper.php:25
+[05-Apr-2023 08:43:00 UTC] Stack trace:
+[05-Apr-2023 08:43:00 UTC] #0 /var/www/html/src/Database/MySQLiWrapper.php(25): mysqli_connect('localhost', 'root', 'password', 'non_existent_db')
+[05-Apr-2023 08:43:00 UTC] #1 /var/www/html/public/report.php(10): App\Database\MySQLiWrapper->connect()
+[05-Apr-2023 08:43:00 UTC] #2 {main}
+[05-Apr-2023 08:43:00 UTC]   thrown in /var/www/html/src/Database/MySQLiWrapper.php on line 25
+
+# --- PHP Warning: Constant DB_HOST already defined. (Common if config is loaded multiple times or not using define_once)
+[05-Apr-2023 08:44:00 UTC] PHP Warning:  Constant DB_HOST already defined in /var/www/html/config/config.php on line 10
+
+# --- PHP Fatal Error: Uncaught Exception: User-defined fatal error. Triggered by `trigger_error` with `E_USER_ERROR`.
+[05-Apr-2023 08:45:00 UTC] PHP Fatal error:  Uncaught Exception: [E_USER_ERROR] Configuration file missing: app_settings.yaml in /var/www/html/bootstrap.php:20
+[05-Apr-2023 08:45:00 UTC] Stack trace:
+[05-Apr-2023 08:45:00 UTC] #0 {main}
+[05-Apr-2023 08:45:00 UTC]   thrown in /var/www/html/bootstrap.php on line 20
+
+# --- PHP Warning: User-defined warning. Triggered by `trigger_error` with `E_USER_WARNING`.
+[05-Apr-2023 08:46:00 UTC] PHP Warning:  [E_USER_WARNING] Invalid API key used for request. IP: 192.168.1.100 in /var/www/html/api/v2/auth.php on line 30
+
+# --- PHP Notice: User-defined notice. Triggered by `trigger_error` with `E_USER_NOTICE`.
+[05-Apr-2023 08:47:00 UTC] PHP Notice:  [E_USER_NOTICE] Deprecated API endpoint called: /api/v1/legacy in /var/www/html/api/router.php on line 100
+
+# --- PHP Fatal error: Uncaught Error: Cannot use object of type stdClass as array (Type collision)
+[05-Apr-2023 08:48:00 UTC] PHP Fatal error:  Uncaught Error: Cannot use object of type stdClass as array in /var/www/html/src/Utilities/DataConverter.php:55
+[05-Apr-2023 08:48:00 UTC] Stack trace:
+[05-Apr-2023 08:48:00 UTC] #0 {main}
+[05-Apr-2023 08:48:00 UTC]   thrown in /var/www/html/src/Utilities/DataConverter.php on line 55
+
+# --- PHP Warning: scandir(): failed to open dir: No such file or directory.
+[05-Apr-2023 08:49:00 UTC] PHP Warning:  scandir(non_existent_folder/): failed to open dir: No such file or directory in /var/www/html/admin/file_browser.php on line 15
+
+# --- PHP Warning: array_key_exists(): The first argument should be either a string or an integer. (Type validation)
+[05-Apr-2023 08:50:00 UTC] PHP Warning:  array_key_exists(): The first argument should be either a string or an integer in /var/www/html/src/Validation.php on line 40
+
+# --- PHP Warning: Undefined array key "name" (PHP 8+ more specific wording of undefined index)
+[05-Apr-2023 08:51:00 UTC] PHP Warning:  Undefined array key "name" in /var/www/html/public/profile.php on line 20
+
+# --- PHP Warning: Trying to access array offset on value of type bool (e.g., if a function returned false and you try to treat it as an array)
+[05-Apr-2023 08:52:00 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/www/html/api/data_retrieval.php on line 65
+
+# --- PHP Fatal error: Uncaught MongoDB\Driver\Exception\ConnectionTimeoutException (No such file or directory) (MongoDB library error example)
+[05-Apr-2023 08:53:00 UTC] PHP Fatal error:  Uncaught MongoDB\Driver\Exception\ConnectionTimeoutException: No such file or directory in /var/www/html/vendor/mongodb/mongodb/src/Client.php:120
+[05-Apr-2023 08:53:00 UTC] Stack trace:
+[05-Apr-2023 08:53:00 UTC] #0 /var/www/html/vendor/mongodb/mongodb/src/Client.php(120): MongoDB\Driver\Manager->__construct('mongodb://local...', Array, Array)
+[05-Apr-2023 08:53:00 UTC] #1 /var/www/html/src/Database/MongoDbService.php(30): MongoDB\Client->__construct('mongodb://local...')
+[05-Apr-2023 08:53:00 UTC] #2 /var/www/html/public/analytics_dashboard.php(10): App\Database\MongoDbService->getCollection('events')
+[05-Apr-2023 08:53:00 UTC] #3 {main}
+[05-Apr-2023 08:53:00 UTC]   thrown in /var/www/html/vendor/mongodb/mongodb/src/Client.php on line 120
+
+# --- PHP Warning: fsockopen(): unable to connect to smtp.mailserver.com:587 (Connection refused) (Mail/SMTP client error)
+[05-Apr-2023 08:54:00 UTC] PHP Warning:  fsockopen(): unable to connect to smtp.mailserver.com:587 (Connection refused) in /var/www/html/vendor/phpmailer/phpmailer/src/PHPMailer.php on line 1500
+
+# --- PHP Warning: count(): Parameter must be an array or an object that implements Countable.
+[05-Apr-2023 08:55:00 UTC] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in /var/www/html/src/Collection.php on line 75
+
+# --- PHP Warning: require_once(): Failed opening required 'non_existent_file.php' (include_path='.:/usr/local/lib/php'). (Can also be a Fatal, depends on context/version/error_reporting)
+[05-Apr-2023 08:56:00 UTC] PHP Warning:  require_once(non_existent_file.php): Failed opening required 'non_existent_file.php' (include_path='.:/usr/local/lib/php') in /var/www/html/public/setup.php on line 10
+
+# --- PHP Warning: curl_exec(): SSL certificate problem: self signed certificate. (Another common cURL error)
+[05-Apr-2023 08:57:00 UTC] PHP Warning:  curl_exec(): SSL certificate problem: self signed certificate in /var/www/html/src/Integration/PayPalClient.php on line 200
+
+# --- PHP Notice: Trying to get property 'id' of non-object. (Another example of accessing property on non-object)
+[05-Apr-2023 08:58:00 UTC] PHP Notice:  Trying to get property 'id' of non-object in /var/www/html/public/view_item.php on line 45
+
+# --- PHP Fatal error: Uncaught Error: Cannot redeclare function myFunction(). (Function redefinition error)
+[05-Apr-2023 08:59:00 UTC] PHP Fatal error:  Uncaught Error: Cannot redeclare function myFunction() (previously declared in /var/www/html/includes/functions_a.php:10) in /var/www/html/includes/functions_b.php:20
+[05-Apr-2023 08:59:00 UTC] Stack trace:
+[05-Apr-2023 08:59:00 UTC] #0 /var/www/html/public/app.php(5): require_once('/var/www/html/i...')
+[05-Apr-2023 08:59:00 UTC] #1 {main}
+[05-Apr-2023 08:59:00 UTC]   thrown in /var/www/html/includes/functions_b.php on line 20
+
+[15-Aug-2025 19:53:10 UTC] PHP Warning:  Undefined variable $seller in /home/mybouquet/public_html/homepage/index.php on line 30
+[15-Aug-2025 19:53:10 UTC] PHP Warning:  Undefined variable $seller in /home/mybouquet/public_html/homepage/index.php on line 30
+[15-Aug-2025 19:53:10 UTC] PHP Warning:  Undefined variable $seller in /home/mybouquet/public_html/homepage/index.php on line 30
