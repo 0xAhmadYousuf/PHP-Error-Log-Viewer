@@ -1,8 +1,8 @@
 # PHP Error Log Viewer 🐘
 
-[![GitHub](https://img.shields.io/github/license/0xAhmadYousuf/PHP-Error-Log-View)](https://github.com/0xAhmadYousuf/PHP-Error-Log-View)
-[![GitHub stars](https://img.shields.io/github/stars/0xAhmadYousuf/PHP-Error-Log-View)](https://github.com/0xAhmadYousuf/PHP-Error-Log-View/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/0xAhmadYousuf/PHP-Error-Log-View)](https://github.com/0xAhmadYousuf/PHP-Error-Log-View/network)
+[![GitHub](https://img.shields.io/github/license/0xAhmadYousuf/PHP-Error-Log-Viewer)](https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer)
+[![GitHub stars](https://img.shields.io/github/stars/0xAhmadYousuf/PHP-Error-Log-Viewer)](https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/0xAhmadYousuf/PHP-Error-Log-Viewer)](https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer/network)
 
 A **professional, feature-rich PHP Error Log Viewer** with advanced tracking, progress monitoring, and beautiful dark/light themes. Perfect for developers who want to efficiently monitor, track, and resolve PHP errors with a modern, intuitive interface.
 
@@ -60,7 +60,7 @@ Create a file called `install.php` in your web root and run it:
 ```php
 <?php
 // PHP Error Log Viewer Installer
-$repo = 'https://github.com/0xAhmadYousuf/PHP-Error-Log-View/archive/refs/heads/main.zip';
+$repo = 'https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer/archive/refs/heads/main.zip';
 $zip = 'error-viewer.zip';
 $target = './error-viewer/';
 
@@ -71,9 +71,9 @@ $za = new ZipArchive();
 if ($za->open($zip) === TRUE) {
     $za->extractTo('./');
     $za->close();
-    rename('./PHP-Error-Log-View-main/src', $target);
+    rename('./PHP-Error-Log-Viewer-main/src', $target);
     unlink($zip);
-    rmdir('./PHP-Error-Log-View-main');
+    rmdir('./PHP-Error-Log-Viewer-main');
     echo "✅ Installation complete! Visit: " . $_SERVER['HTTP_HOST'] . "/error-viewer/\n";
 } else {
     echo "❌ Installation failed. Please download manually.\n";
@@ -85,12 +85,12 @@ if ($za->open($zip) === TRUE) {
 
 1. **Download the repository**:
    ```bash
-   git clone https://github.com/0xAhmadYousuf/PHP-Error-Log-View.git
+   git clone https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer.git
    ```
 
 2. **Copy files to your web directory**:
    ```bash
-   cp -r PHP-Error-Log-View/src/* /path/to/your/webroot/error-viewer/
+   cp -r PHP-Error-Log-Viewer/src/* /path/to/your/webroot/error-viewer/
    ```
 
 3. **Set permissions**:
