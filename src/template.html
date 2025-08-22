@@ -261,6 +261,7 @@
       background-color: var(--bg-secondary) !important;
     }
 
+    [data-theme="dark"] .text-emerald-800,
     [data-theme="dark"] .text-gray-800,
     [data-theme="dark"] .text-yellow-800,
     [data-theme="dark"] .text-blue-800,
@@ -410,16 +411,16 @@
 <body>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-red-700 flex items-center gap-2">
+        <h1 class="text-2xl md:text-3xl font-bold text-red-700 sm:flex items-center gap-2">
           🐘 PHP Error Log Viewer
           <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded critical-blink">Enhanced</span>
         </h1>
         <p class="text-custom-secondary mt-1">Monitor and analyze PHP errors with tracking and theme support</p>
       </div>
 
-      <div class="flex gap-3 items-center">
+      <div class="flex flex-wrap gap-3 items-center">
         <!-- Theme Toggle -->
         <div class="flex items-center gap-2">
           <span class="text-sm text-custom-secondary">🌙</span>
@@ -449,7 +450,7 @@
     <!-- Enhanced Features Info -->
     <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <h3 class="font-semibold text-blue-800 mb-2">💡 Enhanced Features:</h3>
-      <ul class="text-sm text-blue-700 space-y-1">
+      <ul class="text-sm text-blue-800 space-y-1">
         <li>• <strong>Error Tracking:</strong> Mark errors as solved and track who fixed them</li>
         <li>• <strong>Dark/Light Theme:</strong> Switch themes with persistent storage</li>
         <li>• <strong>Full Error View:</strong> View complete error logs for each entry</li>
@@ -460,7 +461,7 @@
 
     <!-- Developer Identity Section -->
     <div class="bg-custom-secondary border border-custom rounded-lg p-4 mb-6">
-      <div class="flex items-center justify-between">
+      <div class="sm:flex items-center justify-between space-y-2 sm:space-y-0">
         <div class="flex items-center gap-3">
           <div class="text-lg">👤</div>
           <div>
@@ -483,15 +484,15 @@
 
     <!-- Footer -->
     <div class="mt-8 text-center text-custom-secondary text-sm">
-      <p style="color: #006647;">Developed By
+      <p class="text-emerald-800">Developed By
         <b>
           <a href="https://0xAhmadYousuf.com" style="text-decoration: none; color: #00bd84;" target="_blank">
             0xAhmadYousuf
           </a>
         </b>
       </p>
-      <p style="color: #006647;">Enhanced Error Log Viewer with Tracking - Last updated: 8/16/2025, 5:19:24 AM </p>
-      <p class="mt-1" style="color: #006647;">Supporting error tracking, themes, and enhanced UX</p>
+      <p class="text-emerald-800">Enhanced Error Log Viewer with Tracking - Last updated: 8/16/2025, 5:19:24 AM </p>
+      <p class="mt-1 text-emerald-800">Supporting error tracking, themes, and enhanced UX</p>
     </div>
   </div>
 
@@ -722,7 +723,7 @@
       el.classList.toggle('hidden');
     }
 
-    function copyPath(fullPath) {
+    function copyPath(el, fullPath) {
       let path = fullPath;
 
       if (path.includes('public_html/')) {
@@ -739,14 +740,14 @@
       }
 
       navigator.clipboard.writeText(path).then(() => {
-        event.target.innerHTML = '✅ Copied';
-        event.target.style.backgroundColor = '#10b981';
-        event.target.style.color = '#ffffff';
+        el.innerHTML = '✅ Copied';
+        el.style.backgroundColor = '#10b981';
+        el.style.color = '#ffffff';
         setTimeout(() => {
-          event.target.innerHTML = '📋 Copy Path';
-          event.target.style.backgroundColor = '';
-          event.target.style.color = '';
-          event.target.className = event.target.className;
+          el.innerHTML = '📋 Copy Path';
+          el.style.backgroundColor = '';
+          el.style.color = '';
+          el.className = el.className;
         }, 2000);
       }).catch(err => {
         console.error('Failed to copy: ', err);
@@ -893,7 +894,7 @@
       initTheme();
       initDeveloperName();
       initSectionStates();
-      document.getElementById('current-time').textContent = new Date().toLocaleString();
+    //   document.getElementById('current-time').textContent = new Date().toLocaleString();
 
       // Auto-expand first group
       const firstGroup = document.querySelector('[id^="group_"], [id^="nonphp_group_"]');
