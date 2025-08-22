@@ -428,12 +428,12 @@ function renderErrorGroup($group, $errors, $solvedData, $solved_but_reoccurred =
 
     $output .= "
         <div class='bg-custom-accent p-4 border-b border-custom cursor-pointer group-header' onclick='toggleGroup(\"{$group_id}\")'>
-            <div class='flex justify-between items-center'>
+            <div class='lg:flex justify-between items-center space-y-2 lg:space-y-0'>
                 <h2 class='text-lg font-semibold text-custom-primary'>
                     📁 <code class='bg-custom-secondary px-2 py-1 rounded'>{$group}</code>
                 </h2>
-                <div class='flex items-center gap-3'>
-                    <div class='text-sm text-custom-secondary'>
+                <div class='flex flex-col sm:flex-row sm:items-center gap-3'>
+                    <div class='text-sm text-custom-secondary shrink-0'>
                         Progress: {$solved_count}/{$error_count} ({$progress_percent}%)";
 
     if ($reoccurred_count > 0) {
@@ -447,20 +447,20 @@ function renderErrorGroup($group, $errors, $solvedData, $solved_but_reoccurred =
 
     $output .= "
                     </div>
-                    <div class='w-40'>
+                    <div class='w-full lg:w-40'>
                         {$progress_bar}
                     </div>";
 
     if ($file_solved) {
         $solved_by = $solvedData['files'][$file_path]['solved_by'] ?? 'Unknown';
         $output .= "
-                    <div class='bg-green-500 text-white px-3 py-1 rounded text-sm'>
+                    <div class='bg-green-500 text-white px-3 py-1 rounded text-sm shrink-0'>
                         ✓ Solved by {$solved_by}
                     </div>";
     } else {
         $output .= "
                     <button onclick='event.stopPropagation(); promptMarkSolved(\"file\", \"{$file_path}\")' 
-                            class='bg-teal-700 hover:bg-teal-500 text-white px-3 py-1 rounded text-sm'>
+                            class='bg-teal-700 hover:bg-teal-500 text-white px-3 py-1 rounded text-sm shrink-0'>
                         ✓ Mark File Solved
                     </button>";
     }
@@ -496,26 +496,26 @@ function renderErrorGroup($group, $errors, $solvedData, $solved_but_reoccurred =
                 ⚠️ REOCCURRED
             </div>" : "") . "
             
-            <div class='flex justify-between items-start mb-2'>
+            <div class='md:flex justify-between items-start mb-2 space-y-2 md:space-y-0 md:space-x-4'>
                 <div class='flex-1'>
                     <div class='font-semibold text-sm mb-1'>
                         <span class='{$details['tag_class']}'>{$details['type']}</span>
                     </div>
                     <div class='text-sm font-medium mb-2 break-words'>" . htmlentities($details['message']) . "</div>
-                    <div class='text-xs text-custom-secondary flex items-center justify-between'>
+                    ". (($details['file'] && $details['line']) ? "<div class='text-xs text-custom-secondary flex items-center justify-between space-x-2'>
                         <div>
                             File: <code class='break-all'>{$details['file']}</code> | Line: <code>{$details['line']}</code>
                         </div>
-                        <button onclick='copyPath(\"{$details['file']}\")' class='copy-btn' title='Copy file path'>
+                        <button onclick='copyPath(this, \"{$details['file']}\")' class='copy-btn shrink-0' title='Copy file path'>
                             📋 Copy Path
                         </button>
-                    </div>
+                    </div>" : "") ."
                 </div>
-                <div class='flex flex-col gap-2 ml-4'>
+                <div class='flex md:flex-col gap-2'>
                     <button class='text-xs text-blue-600 hover:underline whitespace-nowrap' onclick='toggleElement(\"{$times_id}\")'>
                         Times (" . count($occurrences) . ")
                     </button>
-                    <button class='text-xs text-purple-600 hover:underline whitespace-nowrap' data-error-content='" . htmlentities($details['full_content'], ENT_QUOTES) . "' onclick='showFullErrorById(this)'>
+                    <button class='text-xs text-orange-600 hover:underline whitespace-nowrap' data-error-content='" . htmlentities($details['full_content'], ENT_QUOTES) . "' onclick='showFullErrorById(this)'>
                         Full Error
                     </button>";
 
@@ -579,7 +579,7 @@ ob_start();
 ?>
 
 <!-- Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <div class="bg-red-100 border border-red-300 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-red-800"><?= count($non_php_errors) ?></div>
         <div class="text-sm text-red-600">Critical Errors</div>
@@ -768,10 +768,10 @@ $total_progress = $total_errors_count > 0 ? round(($total_solved_count / $total_
         <div class="bg-red-200 p-4 border-b border-red-300 cursor-pointer hover:bg-red-300 transition-colors duration-200"
             onclick="toggleSection('criticalErrors')">
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-bold text-red-800 flex items-center gap-2">
+                <h2 class="text-base md:text-xl font-bold text-red-700 flex items-center gap-2">
                     <span id="criticalErrorsIcon" class="transition-transform duration-200">▶</span>
                     🚨 Critical Library/Framework Errors (only exist here)
-                    <span class="text-sm bg-red-300 text-red-800 px-2 py-1 rounded"><?= count($non_php_errors) ?>
+                    <span class="text-xs md:text-sm bg-red-300 text-red-700 px-2 py-1 rounded shrink-0"><?= count($non_php_errors) ?>
                         groups</span>
                 </h2>
             </div>
@@ -789,10 +789,10 @@ $total_progress = $total_errors_count > 0 ? round(($total_solved_count / $total_
     <div class="bg-blue-200 p-4 border-b border-blue-300 cursor-pointer hover:bg-blue-300 transition-colors duration-200"
         onclick="toggleSection('recentErrors')">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-blue-800 flex items-center gap-2">
+            <h2 class="text-base md:text-xl font-bold text-blue-700 flex items-center gap-2">
                 <span id="recentErrorsIcon" class="transition-transform duration-200">▶</span>
                 🕒 Recent Errors (Last 24 Hours)
-                <span class="text-sm bg-blue-300 text-blue-800 px-2 py-1 rounded"><?= count($recent_errors) ?>
+                <span class="text-xs md:text-sm bg-blue-300 text-blue-700 px-2 py-1 rounded"><?= count($recent_errors) ?>
                     errors</span>
             </h2>
         </div>
@@ -837,7 +837,7 @@ $total_progress = $total_errors_count > 0 ? round(($total_solved_count / $total_
                                         onclick="showFullErrorById(this)" class="copy-btn" title="View full error">
                                         👁️ View Full
                                     </button>
-                                    <button onclick="copyPath('<?= htmlentities($err['full_file_path']) ?>')"
+                                    <button onclick="copyPath(this, '<?= htmlentities($err['full_file_path']) ?>')"
                                         class="copy-btn" title="Copy file path">
                                         📋 Copy Path
                                     </button>
@@ -866,16 +866,16 @@ $total_progress = $total_errors_count > 0 ? round(($total_solved_count / $total_
     <div class="bg-gray-200 p-4 border-b border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors duration-200"
         onclick="toggleSection('errorGroups')">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <h2 class="text-base md:text-xl font-bold text-gray-700 flex items-center gap-2">
                 <span id="errorGroupsIcon" class="transition-transform duration-200">▶</span>
                 📂 Error Groups by File
-                <span class="text-sm bg-gray-300 text-gray-800 px-2 py-1 rounded"><?= count($parsed_errors) ?>
+                <span class="text-xs md:text-sm bg-gray-300 text-gray-700 px-2 py-1 rounded"><?= count($parsed_errors) ?>
                     files</span>
             </h2>
         </div>
     </div>
     <div id="errorGroups" class="p-4 hidden">
-        <div class="text-sm text-gray-700 mb-4">Errors organized by source files for better management and tracking.
+        <div class="text-sm text-gray-800 mb-4">Errors organized by source files for better management and tracking.
         </div>
         <?php foreach ($parsed_errors as $group => $errors): ?>
             <?= renderErrorGroup($group, $errors, $solvedData, $solved_but_reoccurred) ?>
