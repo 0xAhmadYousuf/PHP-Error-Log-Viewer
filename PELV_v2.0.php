@@ -1,17 +1,11 @@
 <?php
-// get error log file path from ini
+// // use it in live mode
 $error_log_file = ini_get('error_log');
 define('ERROR_LOG_FILE', $error_log_file);
-// define('ERROR_LOG_FILE', 'PEL/error_log'); // for custom path if needed
-// get current file name to make api dynamic regardless of its name
 $error_view_file = basename($_SERVER['PHP_SELF']);
 define('ERROR_VIEW_FILE', $error_view_file);
-// generate solved json file name based on current file name
-$error_json_file = str_replace('.php', '.json', $error_view_file);
-define('ERROR_JSON_FILE', $error_json_file);
-// -----------------------------------------------------------------------------------------//
-
-
+// // For now, use a fixed error log file name
+// define('ERROR_LOG_FILE', 'PEL/error_log');
 // echo "i am api, my name is $error_view_file"; exit;
 if (!isset($_GET['action'])) {
     // print the page
@@ -89,8 +83,6 @@ else {
     echo json_encode(['error' => 'Unsupported request method'], JSON_PRETTY_PRINT);
     exit;
 }
-
-
 /**
  * @r___________________________________________________________________________________________________________________________________________
  * @r___________________________________________________________________________________________________________________________________________
@@ -137,7 +129,7 @@ function getStatics() {
     // now get reoccurred errors count
     $reoccurred_errors = getReoccurredErrors();
     $response['total_reoccurred_errors'] = count($reoccurred_errors);
-    // count total solved errors from ERROR_JSON_FILE then minus reoccurred errors
+    // count total solved errors from solved.json then minus reoccurred errors
     $solved = all_solver_records();
     $response['total_solved_errors'] = count($solved) - count($reoccurred_errors);
     return $response;
@@ -172,7 +164,6 @@ function getReoccurredErrors() {
     //     $maxErrorTimestamp = max($error['occurred']['timestamps']);
     //     $errors_timestamps[$hash] = $maxErrorTimestamp;
     // }
-
     // get each of error's max occurred timestamp
     foreach ($errors as $error) {
         // echo json_encode($errors, JSON_PRETTY_PRINT); echo '---'; die;
@@ -187,8 +178,6 @@ function getReoccurredErrors() {
         }
         $errors_timestamps[$hash] = $maxErrorTimestamp;
     }
-
-
     // $r_data = [
     //     'solved_timestamps' => $solved_timestamps,
     //     'errors_timestamps' => $errors_timestamps,
@@ -209,10 +198,6 @@ function getReoccurredErrors() {
     }
     return $reoccurred_errors;
 }
-
-
-
-
 function getFullErrorLog($sort_by=false) {
     $errors = extractErrorsFromFile(ERROR_LOG_FILE);
     $unique_errors = [];
@@ -234,8 +219,6 @@ function getFullErrorLog($sort_by=false) {
     }
     return $unique_errors;
 }
-
-
 function getErrorAndCount($sort_by=false) {
     $count = 0;
     $errors = extractErrorsFromFile(ERROR_LOG_FILE);
@@ -259,10 +242,6 @@ function getErrorAndCount($sort_by=false) {
     }
     return ['errors' => $unique_errors, 'count' => $count];
 }
-
-
-
-
 function countOccurrences($errors, $hash) {
     $count = 0;
     foreach ($errors as $error) {
@@ -289,7 +268,6 @@ function sendRawErrorLog() {
         echo json_encode(['error' => 'Error log file not found', 'file' => ERROR_LOG_FILE], JSON_PRETTY_PRINT);
     }
 }
-
 /**
  * Clear the error log file
  * @return boolean True if successful, false otherwise
@@ -310,6 +288,11 @@ function clear_error_log() {
     }
     return false;
 }
+/**
+ * @r___________________________________________________________________________________________________________________________________________
+ * @r___________________________________________________________________________________________________________________________________________
+ * @r___________________________________________________________________________________________________________________________________________
+ */
 function checkFileExists($filePath) {
     if (file_exists($filePath)) {
         return true;
@@ -325,12 +308,13 @@ function checkFileExists($filePath) {
     return false;
 }
 function add_solver($hash, $solver_name, $additional_data = []) {
-    if (!checkFileExists(ERROR_JSON_FILE)) {
+    $jsonFile = 'solved.json';
+    if (!checkFileExists($jsonFile)) {
         return false;
     }
     $data = [];
-    if (file_exists(ERROR_JSON_FILE)) {
-        $data = json_decode(file_get_contents(ERROR_JSON_FILE), true) ?: [];
+    if (file_exists($jsonFile)) {
+        $data = json_decode(file_get_contents($jsonFile), true) ?: [];
     }
     if (!isset($data['errors'][$hash])) {
         $data['errors'][$hash] = [];
@@ -343,19 +327,20 @@ function add_solver($hash, $solver_name, $additional_data = []) {
     ];
     $data['errors'][$hash]['solvers'][] = $solver;
     $data['errors'][$hash]['last_updated'] = time();
-    if (file_put_contents(ERROR_JSON_FILE, json_encode($data, JSON_PRETTY_PRINT))) {
+    if (file_put_contents($jsonFile, json_encode($data, JSON_PRETTY_PRINT))) {
         return true;
     } else {
         return false;
     }
 }
 function get_solvers($hash) {
-    if (!checkFileExists(ERROR_JSON_FILE)) {
+    $jsonFile = 'solved.json';
+    if (!checkFileExists($jsonFile)) {
         return [];
     }
     $data = [];
-    if (file_exists(ERROR_JSON_FILE)) {
-        $data = json_decode(file_get_contents(ERROR_JSON_FILE), true) ?: [];
+    if (file_exists($jsonFile)) {
+        $data = json_decode(file_get_contents($jsonFile), true) ?: [];
     }
     if (isset($data['errors'][$hash])) {
         return $data['errors'][$hash];
@@ -364,16 +349,16 @@ function get_solvers($hash) {
     }
 }
 function all_solver_records() {
-    if (!checkFileExists(ERROR_JSON_FILE)) {
+    $jsonFile = 'solved.json';
+    if (!checkFileExists($jsonFile)) {
         return [];
     }
     $data = [];
-    if (file_exists(ERROR_JSON_FILE)) {
-        $data = json_decode(file_get_contents(ERROR_JSON_FILE), true) ?: [];
+    if (file_exists($jsonFile)) {
+        $data = json_decode(file_get_contents($jsonFile), true) ?: [];
     }
     return $data;
 }
-
 /**
  * @r___________________________________________________________________________________________________________________________________________
  * @r___________________________________________________________________________________________________________________________________________
@@ -1568,7 +1553,6 @@ function html_full_page(){
                     </div>
                 </div>
             </div>
-            
             <!-- Clear Log Confirmation Modal -->
             <div id="clearLogModal" class="modal hidden">
                 <div class="modal-content">
@@ -1585,7 +1569,6 @@ function html_full_page(){
                     </div>
                 </div>
             </div>
-            
             <!-- Theme Toggle -->
             <button id="themeToggle" class="toggle-theme">
                 <span class="material-icons">dark_mode</span>
@@ -1625,7 +1608,6 @@ function html_full_page(){
                 });
                 document.getElementById('confirmSolveBtn').addEventListener('click', solveError);
                 document.getElementById('cancelSolveBtn').addEventListener('click', hideSolveModal);
-                
                 // Clear log modal event listeners
                 document.getElementById('confirmClearBtn').addEventListener('click', clearLog);
                 document.getElementById('cancelClearBtn').addEventListener('click', hideClearLogModal);
@@ -1641,7 +1623,6 @@ function html_full_page(){
                         document.body.classList.add('dark');
                         document.getElementById('themeToggle').innerHTML = '<span class="material-icons">light_mode</span>';
                     }
-                    
                     // Initial data load
                     loadData();
                     // Initial tab activation
@@ -2276,7 +2257,6 @@ function html_full_page(){
                         errorCard.querySelector('.toggle-details').textContent =
                             message.classList.contains('hidden') ? 'View Details' : 'Hide Details';
                     });
-                    
                     // For reoccurred errors, always attach the solve button event listener
                     // For other errors, only attach if not solved
                     if (state === 'reoccurred' || !isSolved) {
@@ -2336,7 +2316,6 @@ function html_full_page(){
                 // Solve an error
                 function solveError() {
                     if (!currentErrorHash) return;
-                    
                     // Find the error data to include with the solution
                     const errorData = allErrors.find(err => err.hash === currentErrorHash);
                     const data = {
@@ -2345,7 +2324,6 @@ function html_full_page(){
                         message: errorData?.message || null,
                         category: errorData?.type || null
                     };
-                    
                     showLoading();
                     fetch(`${apiFile}?action=add_solver`, {
                         method: 'POST',
@@ -2412,21 +2390,17 @@ function html_full_page(){
                     });
                     currentErrorHash = null;
                 }
-                
                 // Show the clear log confirmation modal
                 function showClearLogModal() {
                     document.getElementById('clearLogModal').classList.remove('hidden');
                 }
-                
                 // Hide the clear log confirmation modal
                 function hideClearLogModal() {
                     document.getElementById('clearLogModal').classList.add('hidden');
                 }
-                
                 // Clear the error log
                 function clearLog() {
                     showLoading();
-                    
                     fetch(`${apiFile}?action=clear_log`, {
                         method: 'POST',
                         headers: {
