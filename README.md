@@ -46,8 +46,7 @@ Create a file called `install.php` in your web root and run it:
 **Option 1: Direct Copy-Paste**
 1. Go to: `https://raw.githubusercontent.com/0xAhmadYousuf/PHP-Error-Log-Viewer/refs/heads/main/PELV_v2.0.php`
 2. Copy the entire content
-3. Paste it into a new file (e.g., `index.php`) on your server
-4. Ready to go!
+3. Paste it into a file (e.g., `index.php`), it's ready to go!
 
 **Option 2: Auto-Installer**
 Create `installer.php` with this code, then run/visit it:
