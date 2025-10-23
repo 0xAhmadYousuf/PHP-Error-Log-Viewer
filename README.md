@@ -42,13 +42,6 @@
 
 Create a file called `install.php` in your web root and run it:
 
-```php
-<?php
-// PHP Error Log Viewer Installer
-$repo = 'https://github.com/0xAhmadYousuf/PHP-Error-Log-Viewer/archive/refs/heads/main.zip';
-$zip = 'error-viewer.zip';
-$target = './error-viewer/';
-## Quick Setup
 
 **Option 1: Direct Copy-Paste**
 1. Go to: `https://raw.githubusercontent.com/0xAhmadYousuf/PHP-Error-Log-Viewer/refs/heads/main/PELV_v2.0.php`
