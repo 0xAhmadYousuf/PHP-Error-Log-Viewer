@@ -13,25 +13,43 @@ if (!isset($_GET['action'])) {
     echo $page;
     exit;
 }
+
+
+$page = 1;
+$limit = 50;
+if (isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0) {
+    $page = intval($_GET['page']);
+}
+if (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0) {
+    $limit = intval($_GET['limit']);
+}
+
+
 header('Content-Type: application/json');
 // Handle GET requests
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     switch ($_GET['action']) {
-        case 'errors':
+        case 'recent_error':
             $sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'recency';
             $errors = getFullErrorLog($sort_by);
-            echo json_encode(['errors' => $errors], JSON_PRETTY_PRINT);
+            $errors_pagination = pagination_data($errors, $limit, $page);
+            $errors_data = paginate($errors, $limit, $page);
+            echo json_encode(['errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
             break;
         case 'all_error':
             $errors = getFullErrorLog();
-            echo json_encode(['errors' => $errors], JSON_PRETTY_PRINT);
+            $errors_pagination = pagination_data($errors, $limit, $page);
+            $errors_data = paginate($errors, $limit, $page);
+            echo json_encode(['errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
             break;
         case 'raw_log':
             sendRawErrorLog();
             break;
         case 'reoccurred':
             $reoccurredErrors = getReoccurredErrors();
-            echo json_encode(['errors' => $reoccurredErrors], JSON_PRETTY_PRINT);
+            $reoccurredErrors_pagination = pagination_data($reoccurredErrors, $limit, $page);
+            $reoccurredErrors_data = paginate($reoccurredErrors, $limit, $page);
+            echo json_encode(['errors' => $reoccurredErrors_data, 'pagination' => $reoccurredErrors_pagination], JSON_PRETTY_PRINT);
             break;
         case 'get_statics':
             $statistics = getStatics();
@@ -93,6 +111,28 @@ else {
  * @r___________________________________________________________________________________________________________________________________________
  * @r___________________________________________________________________________________________________________________________________________
  */
+
+function pagination_data($data, $per_page = 50, $page = 1){
+    $total_items = count($data);
+    $total_pages = ceil($total_items / $per_page);
+    $page = max(1, min($page, $total_pages));
+    return [
+        'current_page' => $page,
+        'per_page' => $per_page,
+        'total_items' => $total_items,
+        'total_pages' => $total_pages
+    ];
+}
+
+function paginate($data, $per_page = 50, $page = 1){
+    $total_items = count($data);
+    $total_pages = ceil($total_items / $per_page);
+    $page = max(1, min($page, $total_pages));
+    $start_index = ($page - 1) * $per_page;
+    $paged_data = array_slice($data, $start_index, $per_page);
+    return $paged_data;
+}
+
 function getStatics() {
     $response = [
         'total_errors' => 0,
@@ -103,7 +143,8 @@ function getStatics() {
         'total_errors_by_file' => [],
         'total_errors_by_date' => [],
     ];
-    $data = getFullErrorLog(false, true);
+    $data = getErrorAndCount(false, true);
+    // echo json_encode($data, JSON_PRETTY_PRINT); exit;
     $errors_data = $data['errors'];
     $response['total_errors'] = $data['count'];
     foreach ($errors_data as $error) {
@@ -1654,7 +1695,7 @@ function html_full_page(){
                         // For parsed and recent tabs, load the regular data
                         Promise.all([
                             fetch(`${apiFile}?action=all_solvers`).then(response => response.json()),
-                            fetch(`${apiFile}?action=errors`).then(response => response.json())
+                            fetch(`${apiFile}?action=all_error`).then(response => response.json())
                         ])
                         .then(([solversData, errorsData]) => {
                             solvedRecords = solversData;
@@ -2065,7 +2106,7 @@ function html_full_page(){
                             // Fetch data for parsed tab
                             Promise.all([
                                 fetch(`${apiFile}?action=all_solvers`).then(response => response.json()),
-                                fetch(`${apiFile}?action=errors`).then(response => response.json())
+                                fetch(`${apiFile}?action=recent_error`).then(response => response.json())
                             ])
                             .then(([solversData, errorsData]) => {
                                 solvedRecords = solversData;
@@ -2084,7 +2125,7 @@ function html_full_page(){
                             // Fetch data for recent tab
                             Promise.all([
                                 fetch(`${apiFile}?action=all_solvers`).then(response => response.json()),
-                                fetch(`${apiFile}?action=errors`).then(response => response.json())
+                                fetch(`${apiFile}?action=recent_error`).then(response => response.json())
                             ])
                             .then(([solversData, errorsData]) => {
                                 solvedRecords = solversData;
