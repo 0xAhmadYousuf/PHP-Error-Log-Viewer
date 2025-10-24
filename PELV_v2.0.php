@@ -7,13 +7,25 @@ define('ERROR_VIEW_FILE', $error_view_file);
 // // For now, use a fixed error log file name
 // define('ERROR_LOG_FILE', 'PEL/error_log');
 // echo "i am api, my name is $error_view_file"; exit;
-if (!isset($_GET['action'])) {
+
+define('ERROR_CACHE_JSON_FILE', str_replace('.php', '_log.json', ERROR_VIEW_FILE));
+define('JSON_ERROR_LOG', str_replace('.php', '_errors.json', ERROR_VIEW_FILE));
+define('JSON_ERROR_METADATA', str_replace('.php', '_metadata.json', ERROR_VIEW_FILE));
+define('EXCEPTIONAL_KEYS', ['phone', 'mobile', 'password', 'access_token']);
+define('NEW_LINE_SEPARATOR', '||PEV-NEW-LINE||');
+define('BASE_DIR', $_SERVER['DOCUMENT_ROOT']);
+
+if (!isset($_GET['action']) && !isset($_GET['multi_action']) && !isset($_GET['frontend_info'])) {
     // print the page
     $page = html_full_page();
     echo $page;
     exit;
 }
-
+$metaData = [
+    'base_dir' => $_SERVER['DOCUMENT_ROOT'],
+    'new_line_separator' => '||PEV-NEW-LINE||',
+];
+$base_dir = $_SERVER['DOCUMENT_ROOT'];
 
 $page = 1;
 $limit = 50;
@@ -23,37 +35,100 @@ if (isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0) {
 if (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0) {
     $limit = intval($_GET['limit']);
 }
-
+// fro raw log
+$total_line = 300;
+if(isset($_GET['total_line']) && is_numeric($_GET['total_line']) && $_GET['total_line'] > 0) {
+    $total_line = intval($_GET['total_line']);
+}
 
 header('Content-Type: application/json');
 // Handle GET requests
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+    // load errors in a variable to make it little faster
+    $loaded_errors = extractErrorsFromFile(ERROR_LOG_FILE);
+    define('LOADED_ERRORS', $loaded_errors);
+
+    // if needed multi action so to make it lite action do all actions in one go
+    if(isset($_GET['multi_action'])){
+        $multi_action = $_GET['multi_action'];
+        $actions = json_decode($multi_action, true);
+        if (empty($actions) || !is_array($actions)) {
+            echo json_encode(['error' => 'Invalid multi_action parameter'], JSON_PRETTY_PRINT);
+            exit;
+        }
+        $allowed_actions = ['recent_error', 'all_error', 'raw_log', 'reoccurred', 'get_statics', 'get_solvers', 'all_solvers', 'cache_status'];
+        
+        // echo json_encode(['success' => true, 'actions' => $actions], JSON_PRETTY_PRINT);
+        // exit;
+        $response = [];
+        foreach ($actions as $action) {
+            if (in_array($action, $allowed_actions)) {
+                if($action == 'recent_error'){
+                    $response['recent_error'] = getFullErrorLog('recency');
+                }
+                else if($action == 'all_error'){
+                    $response['all_error'] = getFullErrorLog();
+                }
+                else if($action == 'raw_log'){
+                    ob_start();
+                    sendRawErrorLog($total_line);
+                    $raw_log_output = ob_get_clean();
+                    $response['raw_log'] = json_decode($raw_log_output, true);
+                }
+                else if($action == 'reoccurred'){
+                    $response['reoccurred'] = getReoccurredErrors();
+                }
+                else if($action == 'get_statics'){
+                    $response['get_statics'] = getStatics();
+                }
+                else if($action == 'get_solvers'){
+                    if (!isset($_GET['hash'])) {
+                        echo json_encode(['error' => 'Hash parameter is required for get_solvers action'], JSON_PRETTY_PRINT);
+                        exit;
+                    }
+                    $response['get_solvers'] = get_solvers($_GET['hash']);
+                }
+                else if($action == 'all_solvers'){
+                    $response['all_solvers'] = all_solver_records();
+                }
+                else if($action == 'cache_status'){
+                    $response['cache_status'] = getCacheStatus();
+                }
+            }
+        }
+        echo json_encode(['metaData' => $metaData, 'data' => $response], JSON_PRETTY_PRINT);
+    }
+
+
     switch ($_GET['action']) {
         case 'recent_error':
             $sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'recency';
             $errors = getFullErrorLog($sort_by);
             $errors_pagination = pagination_data($errors, $limit, $page);
             $errors_data = paginate($errors, $limit, $page);
-            echo json_encode(['errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
+            echo json_encode(['metaData' => $metaData, 'errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
+            // echo json_encode(['metaData' => $metaData, 'errors' => $errors], JSON_PRETTY_PRINT);
             break;
         case 'all_error':
             $errors = getFullErrorLog();
-            $errors_pagination = pagination_data($errors, $limit, $page);
-            $errors_data = paginate($errors, $limit, $page);
-            echo json_encode(['errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
+            // $errors_pagination = pagination_data($errors, $limit, $page);
+            // $errors_data = paginate($errors, $limit, $page);
+            // echo json_encode(['metaData' => $metaData, 'errors' => $errors_data, 'pagination' => $errors_pagination], JSON_PRETTY_PRINT);
+            echo json_encode(['metaData' => $metaData, 'errors' => $errors], JSON_PRETTY_PRINT);
             break;
         case 'raw_log':
-            sendRawErrorLog();
+            sendRawErrorLog($total_line);
             break;
         case 'reoccurred':
             $reoccurredErrors = getReoccurredErrors();
             $reoccurredErrors_pagination = pagination_data($reoccurredErrors, $limit, $page);
             $reoccurredErrors_data = paginate($reoccurredErrors, $limit, $page);
-            echo json_encode(['errors' => $reoccurredErrors_data, 'pagination' => $reoccurredErrors_pagination], JSON_PRETTY_PRINT);
+            echo json_encode(['metaData' => $metaData, 'errors' => $reoccurredErrors_data, 'pagination' => $reoccurredErrors_pagination], JSON_PRETTY_PRINT);
             break;
         case 'get_statics':
             $statistics = getStatics();
-            echo json_encode($statistics, JSON_PRETTY_PRINT);
+            echo json_encode(['metaData' => $metaData, 'statistics' => $statistics], JSON_PRETTY_PRINT);
             break;
         case 'get_solvers':
             if (!isset($_GET['hash'])) {
@@ -66,6 +141,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'all_solvers':
             $allSolvers = all_solver_records();
             echo json_encode($allSolvers, JSON_PRETTY_PRINT);
+            break;
+        case 'cache_status':
+            $cacheStatus = getCacheStatus();
+            echo json_encode(['metaData' => $metaData, 'cache_status' => $cacheStatus], JSON_PRETTY_PRINT);
+            break;
+        case 'clear_cache':
+            $result = clearErrorCache();
+            echo json_encode(['success' => $result, 'message' => 'Error cache cleared successfully'], JSON_PRETTY_PRINT);
             break;
         default:
             // echo json_encode(['error' => 'Invalid action specified'], JSON_PRETTY_PRINT);
@@ -90,7 +173,10 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'clear_log':
             // Clear the error log file
             $result = clear_error_log();
+            $result = $result ? true : false;
             echo json_encode(['success' => $result, 'message' => 'Error log cleared successfully'], JSON_PRETTY_PRINT);
+            
+            // echo json_encode(['success' => true, 'message' => 'Error log cleared successfully'], JSON_PRETTY_PRINT);
             break;
         default:
             echo json_encode(['error' => 'Invalid action specified'], JSON_PRETTY_PRINT);
@@ -143,7 +229,7 @@ function getStatics() {
         'total_errors_by_file' => [],
         'total_errors_by_date' => [],
     ];
-    $data = getErrorAndCount(false, true);
+    $data = getErrorAndCount(false);
     // echo json_encode($data, JSON_PRETTY_PRINT); exit;
     $errors_data = $data['errors'];
     $response['total_errors'] = $data['count'];
@@ -173,6 +259,28 @@ function getStatics() {
     // count total solved errors from solved.json then minus reoccurred errors
     $solved = all_solver_records();
     $response['total_solved_errors'] = count($solved) - count($reoccurred_errors);
+
+    // calculate total unique errors by counting total of total_by_type and total_by_file and total_by_date are same or not
+    // if they are same then take any of them as total unique errors
+    $total_count = [
+        'by_type' => 0,
+        'by_file' => 0,
+        'by_date' => 0,
+    ];
+    foreach ($response['total_errors_by_type'] as $type => $count) {
+        $total_count['by_type'] += $count;
+    }
+    foreach ($response['total_errors_by_file'] as $file => $count) {
+        $total_count['by_file'] += $count;
+    }
+    foreach ($response['total_errors_by_date'] as $date => $count) {
+        $total_count['by_date'] += $count;
+    }
+    // now check if all three are same
+    if ($total_count['by_type'] === $total_count['by_file'] && $total_count['by_file'] === $total_count['by_date']) {
+        $response['total_unique_errors'] = $total_count['by_type'];
+    }
+
     return $response;
 }
 function getReoccurredErrors() {
@@ -240,7 +348,7 @@ function getReoccurredErrors() {
     return $reoccurred_errors;
 }
 function getFullErrorLog($sort_by=false) {
-    $errors = extractErrorsFromFile(ERROR_LOG_FILE);
+    $errors = LOADED_ERRORS;
     $unique_errors = [];
     $hashes = [];
     foreach ($errors as $error) {
@@ -262,7 +370,7 @@ function getFullErrorLog($sort_by=false) {
 }
 function getErrorAndCount($sort_by=false) {
     $count = 0;
-    $errors = extractErrorsFromFile(ERROR_LOG_FILE);
+    $errors = LOADED_ERRORS;
     $count = count($errors);
     $unique_errors = [];
     $hashes = [];
@@ -301,33 +409,45 @@ function getOccurrenceTimestamps($errors, $hash) {
     }
     return $timestamps;
 }
-function sendRawErrorLog() {
-    if (file_exists(ERROR_LOG_FILE)) {
-        $content = file_get_contents(ERROR_LOG_FILE);
-        echo json_encode(['raw_log' => $content], JSON_PRETTY_PRINT);
-    } else {
-        echo json_encode(['error' => 'Error log file not found', 'file' => ERROR_LOG_FILE], JSON_PRETTY_PRINT);
+function sendRawErrorLog($total_line) {
+    // read last N lines from error log
+    // if total_line is not set, default to 300
+    // use class SplFileObject for efficient reading
+    $file = new SplFileObject(ERROR_LOG_FILE, 'r');
+    $file->seek(PHP_INT_MAX);
+    $last_line = $file->key();
+    $start_line = max(0, $last_line - $total_line + 1); // +1 to include last line
+    $lines = [];
+    for ($i = $start_line; $i <= $last_line; $i++) {
+        $file->seek($i);
+        $lines[] = rtrim($file->current(), "\r\n");
     }
+    echo json_encode(['raw_log' => $lines], JSON_PRETTY_PRINT);
 }
 /**
  * Clear the error log file
  * @return boolean True if successful, false otherwise
  */
 function clear_error_log() {
+    $success = false;
     if (file_exists(ERROR_LOG_FILE)) {
         // Empty the file by writing an empty string to it
         if (file_put_contents(ERROR_LOG_FILE, '') !== false) {
-            return true;
+            $success = true;
         }
     } else {
         // If file doesn't exist, create an empty file
         $handle = fopen(ERROR_LOG_FILE, 'w');
         if ($handle) {
             fclose($handle);
-            return true;
+            $success = true;
         }
     }
-    return false;
+    // Clear the cache as well since log has been cleared
+    if ($success) {
+        clearErrorCache();
+    }
+    return $success;
 }
 /**
  * @r___________________________________________________________________________________________________________________________________________
@@ -369,6 +489,8 @@ function add_solver($hash, $solver_name, $additional_data = []) {
     $data['errors'][$hash]['solvers'][] = $solver;
     $data['errors'][$hash]['last_updated'] = time();
     if (file_put_contents($jsonFile, json_encode($data, JSON_PRETTY_PRINT))) {
+        // Clear the error cache since solving an error changes the error state
+        clearErrorCache();
         return true;
     } else {
         return false;
@@ -423,12 +545,250 @@ function all_solver_records() {
  * @param string $logFile Path to the error log file
  * @return array Array of parsed errors
  */
-function extractErrorsFromFile($logFile)
+
+
+function readLinesFromFile($filename, $start, $end = null) {
+    $file = new SplFileObject($filename);
+    $lines = [];
+    $lineNum = 0;
+    while (!$file->eof()) {
+        $line = $file->fgets();
+        $lineNum++;
+        if ($lineNum < $start) continue;
+        if ($end !== null && $lineNum > $end) break;
+        $lines[] = rtrim($line, "\r\n");
+    }
+    return $lines;
+}
+
+function smartPHPErrorReader($logFile){
+    if (!file_exists($logFile)) {
+        file_put_contents($logFile, json_encode(['errors' => []], JSON_PRETTY_PRINT));
+    }
+}
+
+/**
+ * Get cached errors from JSON file
+ * @param string $logFile Path to the error log file
+ * @return array|null Returns cached data or null if cache doesn't exist/is invalid
+ */
+function getCachedErrors($logFile) {
+    $metadataFile = JSON_ERROR_METADATA;
+    $errorFile = JSON_ERROR_LOG;
+    
+    // Check if both files exist
+    if (!file_exists($metadataFile) || !file_exists($errorFile)) {
+        return null;
+    }
+    
+    // Read metadata first (small file)
+    $metadata = json_decode(file_get_contents($metadataFile), true);
+    if (!$metadata || !isset($metadata['log_file']) || $metadata['log_file'] !== $logFile) {
+        return null;
+    }
+    
+    // Return metadata with errors loaded separately
+    $metadata['errors'] = json_decode(file_get_contents($errorFile), true) ?: [];
+    
+    return $metadata;
+}
+
+/**
+ * Update error cache with new data using separated files
+ * @param string $logFile Path to the error log file
+ * @param array $errors Array of parsed errors
+ * @param array $metadata Cache metadata (line count, hash, etc.)
+ * @return bool Success status
+ */
+function updateErrorCache($logFile, $errors, $metadata) {
+    $metadataFile = JSON_ERROR_METADATA;
+    $errorFile = JSON_ERROR_LOG;
+    
+    // Prepare metadata
+    $cacheMetadata = [
+        'log_file' => $logFile,
+        'last_updated' => time(),
+        'last_line_count' => $metadata['line_count'],
+        'last_hash' => $metadata['file_hash'],
+        'last_size' => $metadata['file_size'],
+        'cache_version' => '2.0',
+        'error_count' => count($errors)
+    ];
+    
+    // Save metadata (small file)
+    $metadataSuccess = file_put_contents($metadataFile, json_encode($cacheMetadata, JSON_PRETTY_PRINT)) !== false;
+    
+    // Save errors (large file)
+    $errorSuccess = file_put_contents($errorFile, json_encode($errors, JSON_PRETTY_PRINT)) !== false;
+    
+    return $metadataSuccess && $errorSuccess;
+}
+
+/**
+ * Check if log file has been updated since last cache (optimized with metadata file)
+ * @param string $logFile Path to the error log file
+ * @param array $cacheMeta Cache metadata
+ * @return bool True if log file has been updated
+ */
+function isLogUpdated($logFile, $cacheMeta) {
+    if (!file_exists($logFile)) {
+        // Log file no longer exists, clear cache
+        clearErrorCache();
+        return false;
+    }
+    
+    $currentSize = filesize($logFile);
+    $currentLineCount = count(file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+    $currentHash = md5_file($logFile);
+    
+    return (
+        $currentSize !== $cacheMeta['last_size'] ||
+        $currentLineCount !== $cacheMeta['last_line_count'] ||
+        $currentHash !== $cacheMeta['last_hash']
+    );
+}
+
+/**
+ * Quick cache validity check using only metadata file (very fast)
+ * @param string $logFile Path to the error log file
+ * @return bool True if cache is valid and current
+ */
+function isCacheValid($logFile) {
+    $metadataFile = JSON_ERROR_METADATA;
+    $errorFile = JSON_ERROR_LOG;
+    
+    // Check if both cache files exist
+    if (!file_exists($metadataFile) || !file_exists($errorFile)) {
+        return false;
+    }
+    
+    // Check if log file exists
+    if (!file_exists($logFile)) {
+        clearErrorCache();
+        return false;
+    }
+    
+    // Read only the small metadata file
+    $metadata = json_decode(file_get_contents($metadataFile), true);
+    if (!$metadata || !isset($metadata['log_file']) || $metadata['log_file'] !== $logFile) {
+        return false;
+    }
+    
+    // Quick file checks without reading content
+    $currentSize = filesize($logFile);
+    $currentHash = md5_file($logFile);
+    
+    return (
+        $currentSize === $metadata['last_size'] &&
+        $currentHash === $metadata['last_hash']
+    );
+}
+
+/**
+ * Get cache status and information for separated cache files
+ * @return array Cache status information
+ */
+function getCacheStatus() {
+    $metadataFile = JSON_ERROR_METADATA;
+    $errorFile = JSON_ERROR_LOG;
+    
+    // Check metadata file
+    if (!file_exists($metadataFile)) {
+        return [
+            'exists' => false,
+            'message' => 'Metadata cache file does not exist',
+            'metadata_file' => $metadataFile,
+            'error_file' => $errorFile
+        ];
+    }
+    
+    // Check error file
+    if (!file_exists($errorFile)) {
+        return [
+            'exists' => false,
+            'message' => 'Error cache file does not exist',
+            'metadata_file' => $metadataFile,
+            'error_file' => $errorFile
+        ];
+    }
+    
+    // Read metadata
+    $metadata = json_decode(file_get_contents($metadataFile), true);
+    if (!$metadata) {
+        return [
+            'exists' => true,
+            'valid' => false,
+            'message' => 'Metadata file exists but contains invalid JSON',
+            'metadata_file' => $metadataFile,
+            'error_file' => $errorFile
+        ];
+    }
+    
+    return [
+        'exists' => true,
+        'valid' => true,
+        'log_file' => $metadata['log_file'] ?? 'unknown',
+        'last_updated' => $metadata['last_updated'] ?? 0,
+        'last_updated_human' => isset($metadata['last_updated']) ? date('Y-m-d H:i:s', $metadata['last_updated']) : 'unknown',
+        'error_count' => $metadata['error_count'] ?? 0,
+        'cache_version' => $metadata['cache_version'] ?? 'unknown',
+        'metadata_file_size' => filesize($metadataFile),
+        'error_file_size' => filesize($errorFile),
+        'metadata_file' => $metadataFile,
+        'error_file' => $errorFile
+    ];
+}
+
+/**
+ * Clear all error cache files (metadata, errors, and legacy cache)
+ * @return bool Success status
+ */
+function clearErrorCache() {
+    $success = true;
+    
+    // Clear new separated cache files
+    $metadataFile = JSON_ERROR_METADATA;
+    $errorFile = JSON_ERROR_LOG;
+    
+    if (file_exists($metadataFile)) {
+        $success = $success && unlink($metadataFile);
+    }
+    
+    if (file_exists($errorFile)) {
+        $success = $success && unlink($errorFile);
+    }
+    
+    // Also clear legacy cache file for backward compatibility
+    $legacyCacheFile = ERROR_CACHE_JSON_FILE;
+    if (file_exists($legacyCacheFile)) {
+        $success = $success && unlink($legacyCacheFile);
+    }
+    
+    return $success;
+}
+
+function extractErrorsFromFile($logFile, $lineLimit=false,$llimit=[0,10])
 {
     if (!file_exists($logFile)) {
+        // Clear cache since log file doesn't exist
+        clearErrorCache();
         return ["error" => "Log file not found: $logFile"];
     }
-    $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    // Quick cache validity check (very fast - only reads small metadata file)
+    if (!$lineLimit && isCacheValid($logFile)) {
+        // Load errors from cache file
+        $errorFile = JSON_ERROR_LOG;
+        $cachedErrors = json_decode(file_get_contents($errorFile), true);
+        return $cachedErrors ?: [];
+    }
+
+    // If cache is invalid or line limiting is used, parse the log file
+    if ($lineLimit) {
+        $lines = readLinesFromFile($logFile, $llimit[0], $llimit[1]);
+    } else {
+        $lines = readLinesFromFile($logFile, 0);
+    }
     $errors = [];
     // Two-pass parsing approach
     // Pass 1: Parse all timestamped errors and identify their positions
@@ -444,15 +804,25 @@ function extractErrorsFromFile($logFile)
             // Extract file path and line number if present
             $filePath = null;
             $lineNum = null;
-            if (preg_match('/in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+            // Pattern 1: "in /path/file.php:line_number" anywhere in message
+            if (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/in\s+(.+?):(\d+)/i', $msg, $fileInfo)) {
+            }
+            // Pattern 2: "in /path/file.php on line number" anywhere in message
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+            }
+            // Pattern 3: "thrown in /path/file.php on line number"
+            elseif (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
+            }
+            // Pattern 4: Generic "in /path/file.php" without line number
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = null;
             }
             $error = [
                 "timestamp" => $timestamp, // Changed to match what frontend expects
@@ -480,13 +850,27 @@ function extractErrorsFromFile($logFile)
                 if (preg_match('/^Stack trace:|^#\d+\s+|thrown in\s+.+?\s+on\s+line\s+\d+/i', $nextLine)) {
                     $error['message'] .= "\n" . $lines[$j];
                     // Try to extract file/line from continuation lines if not already set
-                    if (!$error['file'] && preg_match('/thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
-                        $error['file'] = trim($fileInfo[1]);
-                        $error['line'] = intval($fileInfo[2]);
-                    }
-                    if (!$error['file'] && preg_match('/#\d+\s+(.+?)\((\d+)\)/i', $lines[$j], $fileInfo)) {
-                        $error['file'] = trim($fileInfo[1]);
-                        $error['line'] = intval($fileInfo[2]);
+                    if (!$error['file']) {
+                        // Pattern 1: "thrown in /path/file.php on line number"
+                        if (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 2: Stack trace line "#0 /path/file.php(line)"
+                        elseif (preg_match('/#\d+\s+([\/\\\\][^\s\(]+\.php)\((\d+)\)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 3: "in /path/file.php:line_number" anywhere in line
+                        elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 4: "in /path/file.php on line number" anywhere in line
+                        elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
                     }
                     $j++;
                 } else {
@@ -506,16 +890,24 @@ function extractErrorsFromFile($logFile)
             $msg = $matches[3];
             $filePath = null;
             $lineNum = null;
-            if (preg_match('/in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
-                $filePath = trim($fileInfo[1]);
-                $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/in\s+(.+?):(\d+)/i', $msg, $fileInfo)) {
+            // Pattern 1: "in /path/file.php:line_number" anywhere in message
+            if (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
             }
+            // Pattern 2: "in /path/file.php on line number" anywhere in message
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = intval($fileInfo[2]);
+            }
+            // Pattern 3: Generic "in /path/file.php" without line number
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = null;
+            }
             $error = [
                 "timestamp" => $timestamp,
-                "category" => $errorType,
+                "type" => $errorType,
                 "file" => $filePath,
                 "line" => $lineNum,
                 "message" => $msg,
@@ -538,13 +930,27 @@ function extractErrorsFromFile($logFile)
                 // Stack trace patterns: "Stack trace:", "#0 /path/file.php(123)", "thrown in /path/file.php on line 123"
                 if (preg_match('/^Stack trace:|^#\d+\s+|thrown in\s+.+?\s+on\s+line\s+\d+/i', $nextLine)) {
                     $error['message'] .= "\n" . $lines[$j];
-                    if (!$error['file'] && preg_match('/thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
-                        $error['file'] = trim($fileInfo[1]);
-                        $error['line'] = intval($fileInfo[2]);
-                    }
-                    if (!$error['file'] && preg_match('/#\d+\s+(.+?)\((\d+)\)/i', $lines[$j], $fileInfo)) {
-                        $error['file'] = trim($fileInfo[1]);
-                        $error['line'] = intval($fileInfo[2]);
+                    if (!$error['file']) {
+                        // Pattern 1: "thrown in /path/file.php on line number"
+                        if (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 2: Stack trace line "#0 /path/file.php(line)"
+                        elseif (preg_match('/#\d+\s+([\/\\\\][^\s\(]+\.php)\((\d+)\)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 3: "in /path/file.php:line_number" anywhere in line
+                        elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
+                        // Pattern 4: "in /path/file.php on line number" anywhere in line
+                        elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $lines[$j], $fileInfo)) {
+                            $error['file'] = trim($fileInfo[1]);
+                            $error['line'] = intval($fileInfo[2]);
+                        }
                     }
                     $j++;
                 } else {
@@ -569,7 +975,7 @@ function extractErrorsFromFile($logFile)
             // Check for "thrown in" line
             if (
                 $j < count($lines) &&
-                preg_match('/^\[(.*?)\].*?thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $lines[$j], $thrownMatch)
+                preg_match('/^\[(.*?)\].*?thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $lines[$j], $thrownMatch)
             ) {
                 $timestamp = parseOccurred_at($thrownMatch[1]);
                 $filePath = trim($thrownMatch[2]);
@@ -652,6 +1058,17 @@ function extractErrorsFromFile($logFile)
     foreach ($customErrorSegments as $segment) {
         parseCustomErrorSegment($segment['lines'], $segment['prev_timestamp'], $allErrors);
     }
+
+    // Update cache with newly parsed errors
+    if (!$lineLimit) { // Only cache full log parsing, not limited parsing
+        $metadata = [
+            'line_count' => count(file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)),
+            'file_hash' => md5_file($logFile),
+            'file_size' => filesize($logFile)
+        ];
+        updateErrorCache($logFile, $allErrors, $metadata);
+    }
+
     return $allErrors;
 }
 /**
@@ -682,15 +1099,25 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
             // Extract file path and line number if present (but many custom errors won't have these)
             $filePath = null;
             $lineNum = null;
-            if (preg_match('/in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+            // Pattern 1: "in /path/file.php:line_number" anywhere in message
+            if (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/in\s+(.+?):(\d+)/i', $msg, $fileInfo)) {
+            }
+            // Pattern 2: "in /path/file.php on line number" anywhere in message
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+            }
+            // Pattern 3: "thrown in /path/file.php on line number"
+            elseif (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
+            }
+            // Pattern 4: Generic "in /path/file.php" without line number
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = null;
             }
                 $currentCustomError = [
                 "type" => trim(preg_replace('/\s+/', ' ', $errorType)), // Normalize spacing
@@ -709,12 +1136,25 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
             $msg = $matches[2];
             $filePath = null;
             $lineNum = null;
-            if (preg_match('/in\s+(.+?)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+            // Pattern 1: "in /path/file.php:line_number" anywhere in message
+            if (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
-            } elseif (preg_match('/in\s+(.+?):(\d+)/i', $msg, $fileInfo)) {
+            }
+            // Pattern 2: "in /path/file.php on line number" anywhere in message
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
                 $filePath = trim($fileInfo[1]);
                 $lineNum = intval($fileInfo[2]);
+            }
+            // Pattern 3: "thrown in /path/file.php on line number"
+            elseif (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = intval($fileInfo[2]);
+            }
+            // Pattern 4: Generic "in /path/file.php" without line number
+            elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php)/i', $msg, $fileInfo)) {
+                $filePath = trim($fileInfo[1]);
+                $lineNum = null;
             }
             $currentCustomError = [
                 "type" => $errorType,
@@ -738,7 +1178,7 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
                 $errorType = trim($typeMatch[0]);
             }
             $currentCustomError = [
-                "category" => $errorType,
+                "type" => $errorType,
                 "file" => null,
                 "line" => null,
                 "message" => $line,
@@ -749,13 +1189,27 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
         elseif ($currentCustomError) {
             $currentCustomError['message'] .= "\n" . $line;
             // Try to extract file/line from continuation if not already set
-            if (!$currentCustomError['file'] && preg_match('/thrown in\s+(.+?)\s+on\s+line\s+(\d+)/i', $line, $fileInfo)) {
-                $currentCustomError['file'] = trim($fileInfo[1]);
-                $currentCustomError['line'] = intval($fileInfo[2]);
-            }
-            if (!$currentCustomError['file'] && preg_match('/#\d+\s+(.+?)\((\d+)\)/i', $line, $fileInfo)) {
-                $currentCustomError['file'] = trim($fileInfo[1]);
-                $currentCustomError['line'] = intval($fileInfo[2]);
+            if (!$currentCustomError['file']) {
+                // Pattern 1: "thrown in /path/file.php on line number"
+                if (preg_match('/thrown\s+in\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $line, $fileInfo)) {
+                    $currentCustomError['file'] = trim($fileInfo[1]);
+                    $currentCustomError['line'] = intval($fileInfo[2]);
+                }
+                // Pattern 2: Stack trace line "#0 /path/file.php(line)"
+                elseif (preg_match('/#\d+\s+([\/\\\\][^\s\(]+\.php)\((\d+)\)/i', $line, $fileInfo)) {
+                    $currentCustomError['file'] = trim($fileInfo[1]);
+                    $currentCustomError['line'] = intval($fileInfo[2]);
+                }
+                // Pattern 3: "in /path/file.php:line_number" anywhere in line
+                elseif (preg_match('/\sin\s+([\/\\\\][^\s:]+\.php):(\d+)/i', $line, $fileInfo)) {
+                    $currentCustomError['file'] = trim($fileInfo[1]);
+                    $currentCustomError['line'] = intval($fileInfo[2]);
+                }
+                // Pattern 4: "in /path/file.php on line number" anywhere in line
+                elseif (preg_match('/\sin\s+([\/\\\\][^\s]+\.php)\s+on\s+line\s+(\d+)/i', $line, $fileInfo)) {
+                    $currentCustomError['file'] = trim($fileInfo[1]);
+                    $currentCustomError['line'] = intval($fileInfo[2]);
+                }
             }
         }
         // Standalone log line that doesn't fit other patterns
@@ -764,7 +1218,7 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
                 finalizeCustomError($currentCustomError, $prevOccurred_at, $allErrors);
             }
             $currentCustomError = [
-                "category" => "Custom Log",
+                "type" => "Custom Log",
                 "file" => null,
                 "line" => null,
                 "message" => $line,
@@ -783,7 +1237,7 @@ function parseCustomErrorSegment($lines, $prevOccurred_at, &$allErrors)
 function generateErrorHash($error)
 {
     // Create hash content from error details excluding timestamp (previously timestamp)
-    $hashContent = ($error['type'] ?? $error['category']) . '|' .
+    $hashContent = ($error['type'] ?? $error['type']) . '|' .
         ($error['file'] ?? 'null') . '|' .
         ($error['line'] ?? 'null') . '|' .
         $error['message'];
@@ -797,7 +1251,7 @@ function finalizeCustomError(&$error, $prevOccurred_at, &$allErrors)
 {
     $error['timestamp'] = $prevOccurred_at ?: "unknown";
     $error['prev_time'] = $prevOccurred_at;
-    $error['message'] = str_replace(["\r", "\n"], '||PEV-NEW-LINE||', trim($error['message']));
+    $error['message'] = str_replace(["\r", "\n"], NEW_LINE_SEPARATOR, trim($error['message']));
     $error['hash'] = generateErrorHash($error);
     unset($error['is_custom']); // Remove processing flag
     $allErrors[] = $error;
@@ -807,7 +1261,7 @@ function finalizeCustomError(&$error, $prevOccurred_at, &$allErrors)
  */
 function finalizeError(&$error, &$errors, $prevOccurred_at = null)
 {
-    $error['message'] = str_replace(["\r", "\n"], '||PEV-NEW-LINE||', trim($error['message']));
+    $error['message'] = str_replace(["\r", "\n"], NEW_LINE_SEPARATOR, trim($error['message']));
     $error['prev_time'] = $prevOccurred_at;
     $error['hash'] = generateErrorHash($error);
     $errors[] = $error;
@@ -874,7 +1328,7 @@ function getErrorStatistics($errors)
     $uniqueHashes = [];
     foreach ($errors as $error) {
         // Count by type
-        $type = $error['category'];
+        $type = $error['type'];
         if (!isset($stats['by_type'][$type])) {
             $stats['by_type'][$type] = 0;
         }
@@ -2008,8 +2462,10 @@ function html_full_page(){
                             if (!response.ok) throw new Error('Failed to fetch statistics');
                             return response.json();
                         })
-                        .then(stats => {
-                            console.log("Statistics from API:", stats);
+                        .then(data => {
+                            console.log("Statistics from API:", data);
+                            // get the stats from the data
+                            stats = data.statistics || {};
                             // Update summary statistics
                             totalErrorsEl.textContent = stats.total_errors || 0;
                             solvedErrorsEl.textContent = stats.total_solved_errors || 0;
@@ -2208,8 +2664,8 @@ function html_full_page(){
                     // Get the first line of the message (split by newline markers or just take as is)
                     let shortMessage = error.message;
                     if (typeof shortMessage === 'string') {
-                        if (shortMessage.includes('||PEV-NEW-LINE||')) {
-                            shortMessage = shortMessage.split('||PEV-NEW-LINE||')[0];
+                        if (shortMessage.includes('##NEW_LINE_SEPARATOR##')) {
+                            shortMessage = shortMessage.split('##NEW_LINE_SEPARATOR##')[0];
                         } else if (shortMessage.includes('\n')) {
                             shortMessage = shortMessage.split('\n')[0];
                         }
@@ -2515,5 +2971,6 @@ function html_full_page(){
         HTML;
     // Now replace the placeholder with the actual PHP script name
     $page = str_replace('##APIFILE##', ERROR_VIEW_FILE, $page);
+    $page = str_replace('##NEW_LINE_SEPARATOR##', NEW_LINE_SEPARATOR, $page);
     return $page;
 }
