@@ -228,6 +228,8 @@ function getStatics() {
         'total_errors_by_type' => [],
         'total_errors_by_file' => [],
         'total_errors_by_date' => [],
+        'error_timestamps' => [],
+
     ];
     $data = getErrorAndCount(false);
     // echo json_encode($data, JSON_PRETTY_PRINT); exit;
@@ -252,6 +254,13 @@ function getStatics() {
             $response['total_errors_by_date'][$date] = 0;
         }
         $response['total_errors_by_date'][$date]++;
+
+        // collect error timestamps
+        // echo json_encode($error); exit;
+        // $previus_timestamps = $response['error_timestamps'];
+        // $newfound_timestamps = $error['occurred']['timestamps'] ?? [];
+        // $response['error_timestamps'][] = array_merge($previus_timestamps, $newfound_timestamps);
+        $response['error_timestamps'] = array_merge($response['error_timestamps'], $error['occurred']['timestamps'] ?? []);
     }
     // now get reoccurred errors count
     $reoccurred_errors = getReoccurredErrors();
@@ -280,6 +289,13 @@ function getStatics() {
     if ($total_count['by_type'] === $total_count['by_file'] && $total_count['by_file'] === $total_count['by_date']) {
         $response['total_unique_errors'] = $total_count['by_type'];
     }
+
+    // now group error timestamps to unique and count total similar timestamps so it be short
+    $unique_timestamps = [];
+    foreach ($response['error_timestamps'] as $timestamp) {
+        $unique_timestamps[$timestamp] = ($unique_timestamps[$timestamp] ?? 0) + 1;
+    }
+    $response['error_timestamps'] = $unique_timestamps;
 
     return $response;
 }
